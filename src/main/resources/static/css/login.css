@@ -97,6 +97,9 @@ body {
     height: auto !important;
     margin: 20px auto !important;
     display: block !important;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(2, 8, 23, 0.15);
+    border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .login-heading {
