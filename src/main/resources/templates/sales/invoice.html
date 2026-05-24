@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/manager.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; }
+            .main-content { margin-left: 0; }
+        }
+        .invoice-page { background:#fff; border-radius:12px; border:1px solid var(--border,#e2e8f0); padding:40px; max-width:800px; box-shadow:0 4px 20px rgba(0,0,0,0.04); }
+        .invoice-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:24px; border-bottom:2px solid #e2e8f0; }
+        .invoice-brand h2 { font-size:22px; font-weight:800; color:#1e3a8a; }
+        .invoice-brand p { font-size:13px; color:var(--text-muted,#64748b); }
+        .invoice-meta { text-align:right; }
+        .invoice-meta h3 { font-size:24px; font-weight:800; color:#1e3a8a; letter-spacing:2px; }
+        .invoice-meta p { font-size:13px; color:var(--text-muted,#64748b); margin-top:4px; }
+        .invoice-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px; }
+        .invoice-section h4 { font-size:12px; text-transform:uppercase; color:var(--text-muted,#64748b); letter-spacing:1px; margin-bottom:8px; }
+        .invoice-table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+        .invoice-table th { background:#f8fafc; padding:12px 16px; text-align:left; font-size:12px; text-transform:uppercase; color:var(--text-muted,#64748b); border-bottom:2px solid #e2e8f0; }
+        .invoice-table td { padding:14px 16px; border-bottom:1px solid #f1f5f9; }
+        .invoice-totals { display:flex; flex-direction:column; align-items:flex-end; gap:8px; margin-bottom:24px; }
+        .invoice-total-row { display:flex; justify-content:space-between; width:280px; font-size:14px; padding:6px 0; }
+        .invoice-total-row.final { font-size:18px; font-weight:700; border-top:2px solid #1e3a8a; padding-top:12px; color:#1e3a8a; }
+        .invoice-profit { text-align:right; font-size:16px; font-weight:700; margin-bottom:24px; }
+        .text-profit { color:#10b981; }
+        .text-loss { color:#ef4444; }
+        .invoice-footer { border-top:1px solid #e2e8f0; padding-top:20px; font-size:12px; color:var(--text-muted,#64748b); text-align:center; }
+        .badge-finalized { background:#ecfdf3; color:#166534; border:1px solid #d1fae5; }
+        .badge-draft { background:#f3f4f6; color:#4b5563; border:1px solid #e5e7eb; }
+        .btn-green { background:#10b981; color:white; }
+        .btn-green:hover { background:#059669; }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar (hidden on print) -->
+    <aside class="sidebar no-print">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link"><i class="fas fa-car"></i> Vehicle Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i> Repair &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link active"><i class="fas fa-shopping-cart"></i> Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link"><i class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+        <div class="sidebar-footer"><a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Action buttons (hidden on print) -->
+        <div class="page-header no-print">
+            <div class="page-title">
+                <h1>Sale Invoice</h1>
+                <p>Invoice for the selected sale</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <a th:href="@{/manager/sales}" class="btn btn-outline" style="text-decoration:none;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <a th:if="${sale.invoiceSent == null or !sale.invoiceSent}"
+                   th:href="@{/manager/sales/invoice/{id}/send(id=${sale.id})}"
+                   class="btn btn-primary" style="text-decoration:none;">
+                    <i class="fas fa-paper-plane"></i> Send Invoice
+                </a>
+                <a th:if="${sale.invoiceSent}"
+                   th:href="@{/manager/sales/invoice/{id}/resend(id=${sale.id})}"
+                   class="btn btn-outline" style="text-decoration:none;">
+                    <i class="fas fa-rotate-right"></i> Resend
+                </a>
+                <button class="btn btn-green" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="page-alert page-alert-success no-print"
+             th:if="${param.sendSuccess != null or param.resendSuccess != null}">
+            <i class="fas fa-check-circle"></i>
+            <span>
+                Invoice sent to <strong th:text="${sale.invoiceSentTo != null ? sale.invoiceSentTo : 'Customer'}">customer@email.com</strong>
+            </span>
+        </div>
+
+        <div class="page-alert page-alert-error no-print" th:if="${param.sendError != null}">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span th:switch="${param.sendError[0]}">
+                <span th:case="'missing_email'">Unable to send invoice. Please add a customer email first.</span>
+                <span th:case="'auction'">Unable to send invoice. Auction customers do not have an email address.</span>
+                <span th:case="'mail_error'">Unable to send invoice due to a mail server error. Please try again.</span>
+                <span th:case="*">Unable to send invoice. Please check customer details.</span>
+            </span>
+        </div>
+
+        <!-- Invoice body -->
+        <div class="invoice-page">
+            <div class="invoice-header">
+                <div class="invoice-brand">
+                    <h2>Vehicle Yard</h2>
+                    <p>Management System</p>
+                    <p style="margin-top:8px; color:var(--text-muted); font-size:13px;">vehicle@yard.com | +94-11-000-0000</p>
+                </div>
+                <div class="invoice-meta">
+                    <h3>INVOICE</h3>
+                    <p>Invoice #<span th:text="${'INV-' + sale.id}">INV-1</span></p>
+                    <p th:text="${'Date: ' + sale.saleDate}">Date</p>
+                    <p th:if="${sale.saleStatus != null}" style="margin-top:8px;">
+                        <span class="badge"
+                            th:classappend="${sale.saleStatus.equalsIgnoreCase('FINALIZED')} ? 'badge-finalized' : 'badge-draft'"
+                            th:text="${sale.saleStatus}">Status</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="invoice-grid">
+                <div class="invoice-section">
+                    <h4>Bill To</h4>
+                    <p style="font-weight:600; font-size:15px;" th:text="${sale.customerName}">Customer</p>
+                    <p th:text="${sale.contactNumber}">Contact</p>
+                    <p th:text="${sale.email}">Email</p>
+                </div>
+            </div>
+
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Details</th>
+                        <th style="text-align:right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong th:text="${sale.vehicle != null ? (sale.vehicle.vehicleModel != null ? sale.vehicle.vehicleModel : 'Vehicle') : 'Vehicle'}">Model</strong>
+                        </td>
+                        <td>
+                            <span th:text="${'Chassis: ' + (sale.vehicle != null ? sale.vehicle.chassisNumber : '-')}">Chassis</span><br>
+                            <span th:text="${'Plate: ' + (sale.vehicle != null ? sale.vehicle.licensePlate : '-')}">Plate</span>
+                        </td>
+                        <td style="text-align:right; font-weight:600;" th:text="${'$' + sale.salePrice}">$0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="invoice-totals">
+                <div class="invoice-total-row">
+                    <span style="color:var(--text-muted);">Purchase Price</span>
+                    <span th:text="${sale.vehicle != null ? '$' + (sale.vehicle.purchasePrice != null ? sale.vehicle.purchasePrice : 0) : '-'}">$0</span>
+                </div>
+                <div class="invoice-total-row">
+                    <span style="color:var(--text-muted);">Repair Costs</span>
+                    <span th:text="${sale.vehicle != null ? '$' + (sale.vehicle.repairCost != null ? sale.vehicle.repairCost : 0) : '-'}">$0</span>
+                </div>
+                <div class="invoice-total-row final">
+                    <span>Sale Price</span>
+                    <span th:text="${'$' + sale.salePrice}">$0</span>
+                </div>
+            </div>
+
+            <!-- Profit/Loss -->
+            <div class="invoice-profit" th:if="${sale.profit != null}"
+                th:classappend="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'text-profit' : 'text-loss'}">
+                <span th:text="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'Net Profit: $' + sale.profit : 'Net Loss: $' + sale.profit.abs()}">
+                    Profit/Loss
+                </span>
+            </div>
+
+            <div class="invoice-footer">
+                <p>Thank you for your business. This is an official invoice from Vehicle Yard Management System.</p>
+                <p style="margin-top:6px;">Generated on: <span
+                        th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy')}">Today</span></p>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

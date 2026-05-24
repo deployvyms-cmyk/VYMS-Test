@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Inventory - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/manager.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Embed layout/grid styles from inventory.css */
+        .search-bar {
+            background: var(--bg-card, #ffffff);
+            border-radius: 10px;
+            border: 1px solid var(--border, #e2e8f0);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .search-input-wrapper i {
+            color: var(--text-muted, #64748b);
+        }
+
+        .search-input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            color: var(--text-main, #0f172a);
+            width: 100%;
+            background: transparent;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border, #e2e8f0);
+            background: transparent;
+            color: var(--text-muted, #64748b);
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--text-main, #0f172a);
+            color: white;
+            border-color: var(--text-main, #0f172a);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: #f1f5f9;
+        }
+
+        /* Vehicle Grid */
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .vehicle-card {
+            background: var(--bg-card, #ffffff);
+            border-radius: 12px;
+            border: 1px solid var(--border, #e2e8f0);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .vehicle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .vehicle-image-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .vehicle-image-container img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .vehicle-img-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+            color: var(--text-muted, #64748b);
+            font-size: 40px;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-sold {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge-unsold {
+            background: #10b981;
+            color: white;
+        }
+
+        .vehicle-details {
+            padding: 18px;
+        }
+
+        .vehicle-details h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main, #0f172a);
+        }
+
+        .detail-row {
+            font-size: 13px;
+            color: var(--text-muted, #64748b);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-row span {
+            color: var(--text-main, #0f172a);
+            font-weight: 600;
+        }
+
+        .detail-row.price span {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .vehicle-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border, #e2e8f0);
+        }
+
+        /* Typeahead Combobox */
+        .brand-combobox {
+            position: relative;
+        }
+
+        .brand-input-wrap {
+            position: relative;
+            display: block;
+        }
+
+        .brand-typed {
+            position: relative;
+            z-index: 2;
+            background: transparent !important;
+        }
+
+        .brand-ghost {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #94a3b8;
+            pointer-events: none;
+            z-index: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .brand-drop-list {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card, #ffffff);
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 9999;
+            list-style: none;
+            padding: 4px 0;
+            margin: 0;
+        }
+
+        .brand-drop-list li {
+            padding: 9px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-main, #0f172a);
+            transition: background 0.15s;
+        }
+
+        .brand-drop-list li:hover,
+        .brand-drop-list li.active {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .brand-drop-list li strong {
+            font-weight: 700;
+        }
+
+        .image-upload-zone {
+            border: 2px dashed var(--border, #e2e8f0);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .image-upload-zone:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .image-upload-zone i {
+            font-size: 28px;
+            color: var(--text-muted, #64748b);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .image-upload-zone p {
+            font-size: 13px;
+            color: var(--text-muted, #64748b);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link active"><i class="fas fa-car"></i> Vehicle Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i> Repair &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link"><i class="fas fa-shopping-cart"></i> Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link"><i class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Vehicle Inventory</h1>
+                <p>Manage yard stock and view dynamic availability</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <a th:href="@{/manager/inventory/download}" class="btn btn-outline">
+                    <i class="fas fa-file-pdf"></i> Download PDF Stock Report
+                </a>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Add Vehicle
+                </button>
+            </div>
+        </div>
+
+        <div th:if="${errorMsg}" class="page-alert page-alert-error" style="margin-bottom:16px;">
+            <i class="fas fa-circle-exclamation"></i>
+            <span th:text="${errorMsg}">Error message</span>
+        </div>
+        <div th:if="${successMsg}" class="page-alert page-alert-success" style="margin-bottom:16px;">
+            <i class="fas fa-circle-check"></i>
+            <span th:text="${successMsg}">Success message</span>
+        </div>
+
+        <!-- Search and filter bar -->
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Search by model, chassis, or plate..." oninput="filterVehicles()">
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" id="filter-unsold" onclick="setFilter('unsold')">Unsold</button>
+                <button class="filter-btn" id="filter-sold" onclick="setFilter('sold')">Sold</button>
+            </div>
+        </div>
+
+        <!-- Vehicles Grid -->
+        <div class="vehicles-grid" id="vehiclesGrid">
+            <div th:each="vehicle : ${vehicles}" class="vehicle-card" th:attr="data-status=${vehicle.status != null ? vehicle.status.toLowerCase() : 'unsold'},
+                           data-model=${vehicle.vehicleModel != null ? vehicle.vehicleModel.toLowerCase() : ''},
+                           data-chassis=${vehicle.chassisNumber != null ? vehicle.chassisNumber.toLowerCase() : ''},
+                           data-plate=${vehicle.licensePlate != null ? vehicle.licensePlate.toLowerCase() : ''}">
+
+                <div class="vehicle-image-container">
+                    <img th:if="${vehicle.imagePath != null and !vehicle.imagePath.isEmpty()}"
+                        th:src="${vehicle.imagePath}" alt="Vehicle Image">
+                    <div th:unless="${vehicle.imagePath != null and !vehicle.imagePath.isEmpty()}"
+                        class="vehicle-img-placeholder">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <span class="status-badge"
+                        th:classappend="${vehicle.status != null and vehicle.status.equalsIgnoreCase('SOLD')} ? 'badge-sold' : 'badge-unsold'"
+                        th:text="${vehicle.status != null ? vehicle.status : 'Unsold'}">Status</span>
+                </div>
+
+                <div class="vehicle-details">
+                    <h3 th:text="${vehicle.vehicleModel != null ? vehicle.vehicleModel : 'Unknown Model'}">Model</h3>
+                    <div class="detail-row">
+                        Chassis Number <span><th:block th:text="${vehicle.chassisNumber != null ? vehicle.chassisNumber : '-'}"></th:block></span>
+                    </div>
+                    <div class="detail-row">
+                        License Plate <span><th:block th:text="${vehicle.licensePlate != null ? vehicle.licensePlate : '-'}"></th:block></span>
+                    </div>
+                    <div class="detail-row">
+                        Purchase Cost <span><th:block th:text="${vehicle.purchasePrice != null ? '$' + #numbers.formatDecimal(vehicle.purchasePrice, 1, 2) : '$0.00'}"></th:block></span>
+                    </div>
+                    <div class="detail-row">
+                        Repair Expense <span th:style="${vehicle.repairCost != null and vehicle.repairCost.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'color:#ef4444;' : ''"><th:block th:text="${vehicle.repairCost != null ? '$' + #numbers.formatDecimal(vehicle.repairCost, 1, 2) : '$0.00'}"></th:block></span>
+                    </div>
+                    <div class="detail-row" th:if="${vehicle.addedDate != null}">
+                        Date Registered <span><th:block th:text="${vehicle.addedDate}"></th:block></span>
+                    </div>
+                    <div class="detail-row price" th:if="${vehicle.salePrice != null}">
+                        Finalized Sale Price <span><th:block th:text="${'$' + #numbers.formatDecimal(vehicle.salePrice, 1, 2)}"></th:block></span>
+                    </div>
+                    <div class="vehicle-actions">
+                        <a th:href="@{/manager/inventory/edit/{id}(id=${vehicle.id})}" class="btn btn-outline btn-sm"
+                            style="text-decoration:none; flex-grow:1; text-align:center; justify-content:center;">
+                            <i class="fas fa-edit"></i> Edit Details
+                        </a>
+                        <a th:if="${vehicle.status != 'SOLD'}" th:href="@{/manager/repair(vehicleId=${vehicle.id})}" class="btn btn-outline btn-sm"
+                            style="text-decoration:none; color:var(--primary); border-color:#bfdbfe; background:#f0f7ff;">
+                            <i class="fas fa-tools"></i> Repair
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(vehicles)}"
+                style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-muted);">
+                <i class="fas fa-car" style="font-size: 48px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
+                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No vehicles in yard</p>
+                <p>Click "Add Vehicle" to register new vehicle inventory.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Vehicle Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Add New Vehicle</h2>
+                    <p class="modal-subtitle">Enter the vehicle specifications below.</p>
+                </div>
+                <button class="modal-close" onclick="closeAddModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form th:action="@{/manager/inventory/add}" method="post" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Chassis Number</label>
+                        <input type="text" name="chassisNumber" class="form-control" oninput="this.value = this.value.toUpperCase()" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">License Plate</label>
+                        <input type="text" name="licensePlate" class="form-control" oninput="this.value = this.value.toUpperCase()" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vehicle Brand</label>
+                    <!-- Typeahead brand combobox -->
+                    <div class="brand-combobox" id="brandCombobox">
+                        <div class="brand-input-wrap">
+                            <input type="text" id="brandTyped" name="brandTyped" class="form-control brand-typed"
+                                placeholder="Type brand name..." autocomplete="off" oninput="onBrandType(this)"
+                                onkeydown="onBrandKey(event)" onfocus="onBrandFocus()" onblur="onBrandBlur()" required>
+                            <span id="brandGhost" class="brand-ghost"></span>
+                        </div>
+                        <ul id="brandDropList" class="brand-drop-list" style="display:none;"></ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model &amp; Year <span style="color:var(--text-muted);font-size:12px;">(e.g. Civic 2022)</span></label>
+                    <input type="text" id="modelInput" name="modelInput" class="form-control" placeholder="e.g., Supra-1997" required
+                        oninput="syncVehicleModel()" onblur="formatModelInput()">
+                </div>
+                <!-- Hidden field that carries the full combined value to the server -->
+                <input type="hidden" name="vehicleModel" id="vehicleModelHidden">
+                
+                <div class="form-group">
+                    <label class="form-label">Purchase Price ($)</label>
+                    <input type="number" name="purchasePrice" class="form-control" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vehicle Image</label>
+                    <div class="image-upload-zone" id="addImageUploadZone" onclick="document.getElementById('add-imageFile').click()" style="position:relative; overflow:hidden; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div id="uploadPrompt" style="display: flex; flex-direction: column; align-items: center;">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:28px; color:var(--text-muted, #64748b); margin-bottom:8px;"></i>
+                            <p style="margin:0; font-size:13px; color:var(--text-muted, #64748b);">Click to browse and upload an image</p>
+                        </div>
+                        <div id="imagePreviewContainer" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; background:#f8fafc; align-items:center; justify-content:center; padding:8px;">
+                            <img id="addImagePreview" src="" alt="Selected Preview" style="max-width:100%; max-height:100px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1;">
+                            <div style="position:absolute; bottom:8px; left:0; right:0; text-align:center; background:rgba(15, 23, 42, 0.75); color:white; padding:4px 0; font-size:11px; font-weight:600; display:flex; justify-content:center; align-items:center; gap:8px;">
+                                <span id="uploadFileName" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                                <button type="button" class="btn btn-sm" onclick="removeSelectedImage(event)" style="background:#ef4444; color:white; border:none; padding:2px 8px; border-radius:4px; font-size:10px; cursor:pointer; height:20px; display:inline-flex; align-items:center;">Remove</button>
+                            </div>
+                        </div>
+                        <input type="file" name="imageFile" id="add-imageFile" accept="image/*" style="display:none;" onchange="previewAddImage(event)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ===================== Brand Typeahead =====================
+        const ALL_BRANDS = [
+            'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi',
+            'Bentley', 'BMW', 'Buick', 'BYD',
+            'Cadillac', 'Chevrolet', 'Chrysler',
+            'Dodge',
+            'Ferrari', 'Fiat', 'Ford',
+            'Geely', 'Genesis', 'GMC',
+            'Honda', 'Hyundai',
+            'Infiniti',
+            'Jaguar', 'Jeep',
+            'Kia',
+            'Lamborghini', 'Land Rover', 'Lexus', 'Lincoln',
+            'Maserati', 'Mazda', 'Mercedes-Benz', 'MG', 'Mini', 'Mitsubishi',
+            'Nissan',
+            'Peugeot', 'Porsche',
+            'Renault', 'Rolls-Royce',
+            'Seat', 'Skoda', 'SsangYong', 'Subaru', 'Suzuki',
+            'Tesla', 'Toyota',
+            'Volkswagen', 'Volvo'
+        ];
+
+        let brandConfirmed = '';
+        let dropHighlight = -1;
+
+        function onBrandType(input) {
+            const val = input.value;
+            brandConfirmed = '';
+            dropHighlight = -1;
+            const ghost = document.getElementById('brandGhost');
+
+            if (!val) {
+                ghost.textContent = '';
+                hideBrandDrop();
+                syncVehicleModel();
+                return;
+            }
+
+            const match = ALL_BRANDS.find(b => b.toLowerCase().startsWith(val.toLowerCase()));
+            ghost.textContent = match ? val + match.slice(val.length) : val;
+
+            const filtered = ALL_BRANDS.filter(b => b.toLowerCase().startsWith(val.toLowerCase()));
+            if (filtered.length > 0) {
+                buildDropList(filtered, val);
+            } else {
+                hideBrandDrop();
+            }
+            syncVehicleModel();
+        }
+
+        function onBrandKey(e) {
+            const input = document.getElementById('brandTyped');
+            const dropList = document.getElementById('brandDropList');
+            const items = dropList.querySelectorAll('li');
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (dropHighlight >= 0 && items[dropHighlight]) {
+                    selectBrand(items[dropHighlight].dataset.brand);
+                } else {
+                    const ghost = document.getElementById('brandGhost').textContent;
+                    if (ghost) selectBrand(ghost);
+                    else if (input.value.trim()) selectBrand(input.value.trim());
+                }
+                return;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (dropList.style.display === 'none') {
+                    onBrandType(input);
+                }
+                dropHighlight = Math.min(dropHighlight + 1, items.length - 1);
+                updateDropHighlight(items);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                dropHighlight = Math.max(dropHighlight - 1, 0);
+                updateDropHighlight(items);
+                return;
+            }
+            if (e.key === 'Escape') {
+                hideBrandDrop();
+            }
+            if (e.key === 'Tab') {
+                const ghost = document.getElementById('brandGhost').textContent;
+                if (ghost && !brandConfirmed) {
+                    e.preventDefault();
+                    selectBrand(ghost);
+                }
+            }
+        }
+
+        function onBrandFocus() {
+            const input = document.getElementById('brandTyped');
+            if (input.value.trim()) onBrandType(input);
+        }
+
+        function onBrandBlur() {
+            setTimeout(() => {
+                hideBrandDrop();
+                if (!brandConfirmed) {
+                    const val = document.getElementById('brandTyped').value.trim();
+                    if (val) brandConfirmed = val;
+                }
+                syncVehicleModel();
+            }, 180);
+        }
+
+        function buildDropList(brands, typed) {
+            const list = document.getElementById('brandDropList');
+            list.innerHTML = '';
+            dropHighlight = -1;
+            brands.forEach(brand => {
+                const li = document.createElement('li');
+                li.dataset.brand = brand;
+                li.innerHTML = '<strong>' + brand.slice(0, typed.length) + '</strong>' + brand.slice(typed.length);
+                li.addEventListener('mousedown', () => selectBrand(brand));
+                list.appendChild(li);
+            });
+            list.style.display = 'block';
+        }
+
+        function hideBrandDrop() {
+            document.getElementById('brandDropList').style.display = 'none';
+            dropHighlight = -1;
+        }
+
+        function updateDropHighlight(items) {
+            items.forEach((li, i) => li.classList.toggle('active', i === dropHighlight));
+            if (items[dropHighlight]) items[dropHighlight].scrollIntoView({ block: 'nearest' });
+        }
+
+        function selectBrand(brand) {
+            const known = ALL_BRANDS.find(b => b.toLowerCase() === brand.toLowerCase());
+            brandConfirmed = known || toTitleCase(brand);
+            const input = document.getElementById('brandTyped');
+            input.value = brandConfirmed;
+            document.getElementById('brandGhost').textContent = '';
+            hideBrandDrop();
+            syncVehicleModel();
+            document.getElementById('modelInput').focus();
+        }
+
+        function syncVehicleModel() {
+            const raw = document.getElementById('brandTyped').value.trim();
+            const known = ALL_BRANDS.find(b => b.toLowerCase() === raw.toLowerCase());
+            const brand = brandConfirmed
+                ? (ALL_BRANDS.find(b => b.toLowerCase() === brandConfirmed.toLowerCase()) || toTitleCase(brandConfirmed))
+                : (known || toTitleCase(raw));
+            const model = formatModelYear(document.getElementById('modelInput').value);
+            document.getElementById('vehicleModelHidden').value =
+                brand && model ? brand + ' ' + model : (brand || model);
+        }
+
+        function toTitleCase(str) {
+            return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function formatModelYear(val) {
+            val = val.trim();
+            if (!val) return '';
+            const yearMatch = val.match(/^(.+?)[-\s]*(\d{4})$/);
+            if (yearMatch) {
+                const modelPart = toTitleCase(yearMatch[1].trim().replace(/[-\s]+$/, ''));
+                return (modelPart ? modelPart + '-' : '') + yearMatch[2];
+            }
+            return toTitleCase(val);
+        }
+
+        function formatModelInput() {
+            const input = document.getElementById('modelInput');
+            const formatted = formatModelYear(input.value);
+            if (formatted) input.value = formatted;
+            syncVehicleModel();
+        }
+
+        // ===================== Modal =====================
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('brandTyped').value = '';
+            document.getElementById('brandGhost').textContent = '';
+            hideBrandDrop();
+            brandConfirmed = '';
+            document.getElementById('modelInput').value = '';
+            document.getElementById('vehicleModelHidden').value = '';
+        }
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+            resetAddImagePreview();
+        }
+
+        // Preview add vehicle image
+        function previewAddImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('addImagePreview');
+                const prompt = document.getElementById('uploadPrompt');
+                const container = document.getElementById('imagePreviewContainer');
+                const fileName = document.getElementById('uploadFileName');
+
+                preview.src = e.target.result;
+                container.style.display = 'flex';
+                prompt.style.display = 'none';
+                fileName.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeSelectedImage(event) {
+            event.stopPropagation();
+            resetAddImagePreview();
+        }
+
+        function resetAddImagePreview() {
+            document.getElementById('add-imageFile').value = '';
+            document.getElementById('uploadPrompt').style.display = 'flex';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            document.getElementById('addImagePreview').src = '';
+            document.getElementById('uploadFileName').textContent = '';
+        }
+
+        document.querySelector('#addModal form').addEventListener('submit', function (e) {
+            syncVehicleModel();
+            const brand = document.getElementById('brandTyped').value.trim();
+            const model = document.getElementById('modelInput').value.trim();
+            const hidden = document.getElementById('vehicleModelHidden');
+            if (!brand) {
+                e.preventDefault();
+                alert('Please enter a vehicle brand.');
+                document.getElementById('brandTyped').focus();
+                return;
+            }
+            if (!model || !hidden.value.trim()) {
+                e.preventDefault();
+                alert('Please enter a model name.');
+                document.getElementById('modelInput').focus();
+            }
+        });
+
+        let currentFilter = 'all';
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('filter-' + filter).classList.add('active');
+            applyFilters();
+        }
+
+        function filterVehicles() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#vehiclesGrid .vehicle-card').forEach(card => {
+                const status = card.dataset.status || '';
+                const model = card.dataset.model || '';
+                const chassis = card.dataset.chassis || '';
+                const plate = card.dataset.plate || '';
+
+                const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                const matchesSearch = !query || model.includes(query) || chassis.includes(query) || plate.includes(query);
+
+                card.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

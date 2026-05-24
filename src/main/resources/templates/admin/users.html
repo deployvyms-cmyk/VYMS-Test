@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Role summary cards */
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .role-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .role-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Header actions (search and add user) */
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        /* Delete button styling */
+        .btn-danger-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: var(--danger-bg);
+            color: var(--danger);
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .btn-danger-sm:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .field-error {
+            display: block;
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .flash-success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            color: #065f46;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flash-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            color: #991b1b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar">AU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Admin User'}">Admin User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Admin'}">Admin</p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a th:href="@{/admin}" class="nav-link">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/users}" class="nav-link active">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/reports}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/profile}" class="nav-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main user management content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>User Management</h1>
+                <p>Manage employee roles and permissions</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i> Add Employee
+            </button>
+        </div>
+
+        <div class="flash-success" th:if="${successMsg != null and !#strings.isEmpty(successMsg)}">
+            <i class="fas fa-check-circle"></i><span th:text="${successMsg}"></span>
+        </div>
+        <div class="flash-error" th:if="${errorMsg != null and !#strings.isEmpty(errorMsg)}">
+            <i class="fas fa-exclamation-circle"></i><span th:text="${errorMsg}"></span>
+        </div>
+        <div class="flash-error" th:if="${invalidUserCount != null and invalidUserCount > 0}"
+            style="justify-content:space-between;gap:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span th:text="'Found ' + ${invalidUserCount} + ' legacy users with removed roles.'"></span>
+            </div>
+            <form action="/admin/users/cleanup-invalid" method="post" style="margin:0;">
+                <button type="submit" class="btn-danger-sm" onclick="return confirm('Remove legacy users?')">
+                    <i class="fas fa-trash"></i> Remove Legacy Users
+                </button>
+            </form>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Employees</h3>
+                    <div class="metric-value" th:text="${totalUsers}">0</div>
+                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-user-friends"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Active Roles</h3>
+                    <div class="metric-value">2</div>
+                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-shield-alt"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Active Today</h3>
+                    <div class="metric-value" th:text="${totalUsers}">0</div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-user-check"></i></div>
+            </div>
+        </div>
+
+        <!-- Role Distribution -->
+        <div class="table-title" style="margin-bottom: 16px;">Role Distribution</div>
+        <div class="role-cards">
+            <div class="role-card">
+                <div class="role-count" th:text="${countAdmin}">0</div>
+                <div class="role-name">Admin</div>
+            </div>
+            <div class="role-card">
+                <div class="role-count" th:text="${countManager}">0</div>
+                <div class="role-name">Manager</div>
+            </div>
+
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <div class="table-title">All Employees</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}" th:if="${user.role != null}">
+                        <td>
+                            <div style="font-weight:600;"
+                                th:text="${user.username != null ? user.username : 'Unknown'}">Name</div>
+                        </td>
+
+                        <td style="color:var(--text-muted);font-size:13px;" th:text="${user.email}">Email</td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="'badge-' + ${user.role != null ? user.role.name().toLowerCase() : 'user'}"
+                                th:text="${user.role != null ? user.role.name() : 'NONE'}">Role</span>
+                        </td>
+                        <td style="display:flex;gap:8px;align-items:center;">
+                            <button class="btn btn-outline btn-sm edit-btn" onclick="openEditModal(this)"
+                                th:data-id="${user.id}" th:data-name="${user.username}" th:data-email="${user.email}"
+                                th:data-role="${user.role?.name()}">
+                                <i class="fas fa-pencil-alt"></i> Edit
+                            </button>
+                            <a th:href="@{'/admin/users/delete/' + ${user.id}}" class="btn-danger-sm"
+                                onclick="return confirm('Delete this employee?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${users == null or users.empty}">
+                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">No employees
+                            found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add employee modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Add Employee</h2>
+                    <p style="color:var(--text-muted);font-size:14px;margin-top:4px;">Enter employee information and
+                        role details.</p>
+                </div>
+                <button class="modal-close" onclick="closeCreateModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="/admin/users/add" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Employee Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="add-name" name="username" class="form-control" placeholder="Full name"
+                            required minlength="2" maxlength="100" title="Name must be 2-100 letters and spaces only">
+                        <span class="field-error" id="err-add-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role <span style="color:var(--danger)">*</span></label>
+                        <select name="role" class="form-control" required>
+                            <option value="">Select role</option>
+                            <option th:each="role : ${roles}" th:value="${role}" th:text="${role}">Role</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email <span style="color:var(--danger)">*</span></label>
+                    <input type="email" id="add-email" name="email" class="form-control"
+                        placeholder="employee@vehicleyard.com" required>
+                    <span class="field-error" id="err-add-email"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password <span style="color:var(--danger)">*</span></label>
+                    <input type="password" id="add-password" name="password" class="form-control"
+                        placeholder="Set initial password (min 8 chars)" required minlength="8">
+                    <span class="field-error" id="err-add-password"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" onclick="return validateEmployeeForm('add')">Add
+                        Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit employee modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Edit Employee</h2>
+                    <p style="color:var(--text-muted);font-size:14px;margin-top:4px;">Update employee information and
+                        role details.</p>
+                </div>
+                <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Employee Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="edit-name" name="username" class="form-control" required minlength="2"
+                            maxlength="100" title="Name must be 2-100 letters and spaces only">
+                        <span class="field-error" id="err-edit-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role <span style="color:var(--danger)">*</span></label>
+                        <select id="edit-role" name="role" class="form-control" required>
+                            <option th:each="role : ${roles}" th:value="${role}" th:text="${role}">Role</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email <span style="color:var(--danger)">*</span></label>
+                    <input type="email" id="edit-email" name="email" class="form-control" required>
+                    <span class="field-error" id="err-edit-email"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" id="edit-password" name="password" class="form-control"
+                        placeholder="Leave blank to keep unchanged (min 8 chars if changed)">
+                    <span class="field-error" id="err-edit-password"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" onclick="return validateEmployeeForm('edit')">Update
+                        Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* Employee validation + modal controls */
+        const EMP_RE_EMAIL = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        const EMP_RE_NAME = /^[A-Za-z .'-]{2,100}$/;
+
+        function setErr(id, msg) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = msg;
+            }
+        }
+
+        function clearErrs(prefix) {
+            setErr('err-' + prefix + '-name', '');
+            setErr('err-' + prefix + '-email', '');
+            setErr('err-' + prefix + '-password', '');
+        }
+
+        function validateEmployeeForm(prefix) {
+            clearErrs(prefix);
+            let ok = true;
+
+            const name = (document.getElementById(prefix + '-name')?.value || '').trim();
+            const email = (document.getElementById(prefix + '-email')?.value || '').trim();
+            const pw = (document.getElementById(prefix + '-password')?.value || '');
+
+            if (!EMP_RE_NAME.test(name)) {
+                setErr('err-' + prefix + '-name', 'Name must be 2-100 letters and spaces only.');
+                ok = false;
+            }
+            if (!EMP_RE_EMAIL.test(email)) {
+                setErr('err-' + prefix + '-email', 'Enter a valid email address.');
+                ok = false;
+            }
+            if (prefix === 'add' && pw.length < 8) {
+                setErr('err-' + prefix + '-password', 'Password must be at least 8 characters.');
+                ok = false;
+            }
+            if (prefix === 'edit' && pw.length > 0 && pw.length < 8) {
+                setErr('err-' + prefix + '-password', 'Password must be at least 8 characters (or leave blank).');
+                ok = false;
+            }
+            return ok;
+        }
+
+        function openCreateModal() {
+            document.getElementById('createModal')?.classList.add('active');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal')?.classList.remove('active');
+        }
+
+        function openEditModal(btn) {
+            const id = btn.dataset.id;
+            document.getElementById('editForm').action = '/admin/users/edit/' + id;
+            document.getElementById('edit-name').value = btn.dataset.name || '';
+            document.getElementById('edit-email').value = btn.dataset.email || '';
+            document.getElementById('edit-role').value = btn.dataset.role || '';
+            document.getElementById('edit-password').value = '';
+
+            clearErrs('edit');
+            document.getElementById('editModal')?.classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal')?.classList.remove('active');
+        }
+
+        document.addEventListener('keydown', function (evt) {
+            if (evt.key === 'Escape') {
+                closeCreateModal();
+                closeEditModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

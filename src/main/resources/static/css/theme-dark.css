@@ -1,0 +1,235 @@
+/* Dark theme color tokens */
+:root {
+    --primary: #38bdf8;
+    --primary-hover: #0ea5e9;
+    --sidebar-bg: #060d1a;
+    --sidebar-hover: #152238;
+    --sidebar-active: #1d4ed8;
+
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-light: #f8fafc;
+
+    --bg-main: #0b1220;
+    --bg-card: #121d31;
+    --bg-card-alt: #17253c;
+    --border: #26344d;
+
+    --success: #34d399;
+    --success-bg: #0f2f2a;
+    --warning: #fbbf24;
+    --warning-bg: #382d12;
+    --danger: #f87171;
+    --danger-bg: #3a1d26;
+    --info: #60a5fa;
+    --info-bg: #142b46;
+    --purple: #a78bfa;
+    --purple-bg: #251f44;
+    --teal: #2dd4bf;
+    --teal-bg: #0f2f33;
+    --orange: #fb923c;
+    --orange-bg: #3c2718;
+
+    --green-btn: #22c55e;
+    --green-btn-hover: #16a34a;
+}
+
+/* Global background and text colors */
+html,
+body {
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 50%), var(--bg-main) !important;
+    color: var(--text-main) !important;
+}
+
+/* Core surfaces and cards */
+.sidebar,
+.sidebar-header,
+.sidebar-footer,
+.main-content,
+.table-card,
+.metric-card,
+.chart-card,
+.activity-feed,
+.search-bar,
+.edit-card,
+.vehicle-card,
+.role-card,
+.period-bar,
+.stat-card,
+.invoice-page,
+.modal-content,
+.form-section,
+.form-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border) !important;
+    color: var(--text-main);
+}
+
+.sidebar {
+    box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.06), 8px 0 30px rgba(2, 6, 23, 0.45);
+}
+
+.nav-link {
+    color: #cbd5e1;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #ffffff;
+}
+
+.page-title h1,
+.metric-value,
+.table-title,
+.section-title,
+.chart-title,
+h1,
+h2,
+h3,
+label,
+th,
+td,
+p,
+span {
+    color: inherit;
+}
+
+.page-title p,
+.metric-info h3,
+.section-subtitle,
+.helper-text,
+.user-info p,
+.sidebar-header p,
+.footer-brand {
+    color: var(--text-muted) !important;
+}
+
+/* Table and row colors */
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+    border-color: var(--border) !important;
+}
+
+th {
+    background: #0e172a !important;
+    color: #93a8c7 !important;
+}
+
+td {
+    background: transparent !important;
+    color: var(--text-main) !important;
+}
+
+tr:hover td {
+    background: rgba(56, 189, 248, 0.06) !important;
+}
+
+/* Form controls */
+input,
+select,
+textarea {
+    background: #0f1a2e !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-main) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #7b8ca8;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+/* Buttons */
+.btn-outline {
+    color: var(--text-main) !important;
+    border-color: var(--border) !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.btn-outline:hover {
+    background: #1b2a43 !important;
+}
+
+.btn-primary,
+.btn-green {
+    color: #ffffff !important;
+}
+
+/* Alternate surface blocks */
+.activity-item,
+.vehicle-image-container,
+.image-preview-placeholder,
+.invoice-grid > div,
+.table-header,
+.table-header-bar {
+    background: var(--bg-card-alt) !important;
+    border-color: var(--border) !important;
+}
+
+/* Status badges */
+.badge,
+.status-badge,
+.repair-badge,
+.role-chip {
+    border-color: transparent;
+}
+
+.badge-present,
+.badge-done,
+.badge-export,
+.badge-contract,
+.btn-checkin {
+    background: #11372f !important;
+    color: #6ee7b7 !important;
+    border-color: #1d5d50 !important;
+}
+
+.badge-absent,
+.error-banner,
+.badge-sold,
+.btn-danger,
+.btn-danger-sm {
+    background: #3a1d26 !important;
+    color: #fca5a5 !important;
+    border-color: #6b2b39 !important;
+}
+
+.badge-offday,
+.btn-offday {
+    background: #1f2937 !important;
+    color: #d1d5db !important;
+    border-color: #374151 !important;
+}
+
+.badge-halfday,
+.badge-auction,
+.badge-ext,
+.btn-checkout {
+    background: #3b2f13 !important;
+    color: #fcd34d !important;
+    border-color: #5b4819 !important;
+}
+
+.badge-regular,
+.badge-int,
+.badge-permanent {
+    background: #132e4f !important;
+    color: #93c5fd !important;
+    border-color: #1d4d7a !important;
+}
+
+.login-shell,
+.login-card,
+.login-hero {
+    box-shadow: 0 30px 80px rgba(2, 6, 23, 0.55);
+}

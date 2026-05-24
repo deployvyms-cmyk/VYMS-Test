@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="640" height="720" viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title>YOMIRU Mark</title>
+  <desc>Stylized YOMIRU automotive monogram</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#061426" />
+      <stop offset="50%" stop-color="#0b2742" />
+      <stop offset="100%" stop-color="#0e3860" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="720" rx="32" fill="url(#bg)" />
+  <g transform="translate(120 130) scale(0.95)" fill="none" stroke="url(#accent)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 20 L150 240 L70 400" />
+    <path d="M190 20 L315 400" />
+    <path d="M320 260 Q420 230 480 260 Q520 280 545 320 L400 320" />
+    <path d="M260 360 Q360 310 440 360" />
+  </g>
+  <g fill="#8bd5ff" font-family="'Inter', 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="320" y="520" font-size="54" letter-spacing="4">(株) YOMIRU</text>
+    <text x="320" y="575" font-size="40">商会</text>
+  </g>
+</svg>
+

@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Inline field error message */
+        .field-error {
+            display: block;
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar">AU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Admin User'}">Admin User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Admin'}">Admin
+                </p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a th:href="@{/admin}" class="nav-link">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/users}" class="nav-link active">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/reports}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/profile}" class="nav-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Edit User</h1>
+                <p>Update user details</p>
+            </div>
+            <a th:href="@{/admin/users}" class="btn btn-outline" style="text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+
+        <!-- Main edit form content -->
+        <!-- Edit user form -->
+        <div class="chart-card" style="max-width: 600px;">
+            <form th:action="@{/admin/users/edit/{id}(id=${user.id})}" method="post">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="edit-username" name="username" class="form-control"
+                        th:value="${user.username}" required minlength="2" maxlength="100"
+                        title="Name must be 2-100 letters and spaces only">
+                    <span class="field-error" id="err-username"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="edit-email" name="email" class="form-control" th:value="${user.email}"
+                        required>
+                    <span class="field-error" id="err-email"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="edit-password" name="password" class="form-control"
+                        placeholder="Leave blank to keep unchanged (min 8 chars if changed)">
+                    <span class="field-error" id="err-password"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-control" required>
+                        <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"
+                            th:selected="${role == user.role}">Role</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 32px; display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary" onclick="return validateEditUserForm()">Save
+                        Changes</button>
+                    <!-- Also add a delete button -->
+                    <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-outline text-red"
+                        style="text-decoration: none; border-color: var(--danger-bg); background-color: var(--danger-bg);">
+                        <i class="fas fa-trash"></i> Delete User
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        const PAGE_RE_EMAIL = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        const PAGE_RE_NAME = /^[A-Za-z .'-]{2,100}$/;
+
+        function setErr(id, msg) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = msg;
+        }
+
+        function validateEditUserForm() {
+            setErr('err-username', '');
+            setErr('err-email', '');
+            setErr('err-password', '');
+            let ok = true;
+
+            const name = document.getElementById('edit-username')?.value.trim() || '';
+            const email = document.getElementById('edit-email')?.value.trim() || '';
+            const pw = document.getElementById('edit-password')?.value || '';
+
+            if (!PAGE_RE_NAME.test(name)) {
+                setErr('err-username', 'Name must be 2-100 letters and spaces only.');
+                ok = false;
+            }
+            if (!PAGE_RE_EMAIL.test(email)) {
+                setErr('err-email', 'Enter a valid email address.');
+                ok = false;
+            }
+            if (pw.length > 0 && pw.length < 8) {
+                setErr('err-password', 'Password must be at least 8 characters (or leave blank to keep current).');
+                ok = false;
+            }
+            return ok;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar">AU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Admin User'}">Admin User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Admin'}">Admin</p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a th:href="@{/admin}" class="nav-link active">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/users}" class="nav-link">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/reports}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/profile}" class="nav-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main dashboard content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Dashboard</h1>
+                <p th:text="${currentUser != null ? 'Welcome back, ' + currentUser.username : 'Welcome back, Admin User'}">Welcome back, Admin User</p>
+            </div>
+        </div>
+
+        <!-- High-level metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Vehicles</h3>
+                    <div class="metric-value" th:text="${totalVehicles}">0</div>
+                </div>
+                <div class="metric-icon icon-blue">
+                    <i class="fas fa-car"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Sales</h3>
+                    <div class="metric-value" th:text="${totalSales}">0</div>
+                </div>
+                <div class="metric-icon icon-green">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">$0</div>
+                </div>
+                <div class="metric-icon icon-purple">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Profit</h3>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalProfit, 1, 0)}">$0</div>
+                </div>
+                <div class="metric-icon icon-green">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and recent activity -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Overall Financials (Revenue vs Costs)</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="financialsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Sales Pipeline Output</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pipelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Scripts for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const rev = /*[[${chartTotalRevenue != null ? chartTotalRevenue : 0}]]*/ 0;
+            const pur = /*[[${chartTotalPurchase != null ? chartTotalPurchase : 0}]]*/ 0;
+            const rep = /*[[${chartTotalRepair != null ? chartTotalRepair : 0}]]*/ 0;
+            
+            new Chart(document.getElementById('financialsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Total Revenue', 'Vehicle Purchases', 'Vehicle Repairs'],
+                    datasets: [{
+                        data: [rev, pur, rep],
+                        backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '65%'
+                }
+            });
+
+            const draft = /*[[${countDraft != null ? countDraft : 0}]]*/ 0;
+            const finalized = /*[[${countFinalized != null ? countFinalized : 0}]]*/ 0;
+
+            new Chart(document.getElementById('pipelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Draft', 'Finalized'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [draft, finalized],
+                        backgroundColor: ['#9ca3af', '#8b5cf6'],
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        barThickness: 42
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

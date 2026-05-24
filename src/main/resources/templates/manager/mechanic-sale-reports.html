@@ -1,0 +1,767 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reports &amp; Analytics - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/manager.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Extra report page styles */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .metrics-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .metrics-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .charts-grid-3 {
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            display: grid;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 14px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+
+        .divider-section {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 28px 0 20px;
+        }
+
+        .badge-regular {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-export {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-auction {
+            background: #fef9c3;
+            color: #a16207;
+        }
+
+        .text-green {
+            color: #16a34a;
+        }
+
+        .text-red {
+            color: #dc2626;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .repair-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-int {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-ext {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-pending-r {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .badge-inspected-r {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .inv-stat-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .inv-stat {
+            flex: 1;
+            min-width: 130px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+        }
+
+        .inv-stat h4 {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .inv-stat .val {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .inv-stat .val.green {
+            color: #16a34a;
+        }
+
+        .inv-stat .val.blue {
+            color: #2563eb;
+        }
+
+        .inv-stat .val.orange {
+            color: #d97706;
+        }
+
+        .inv-stat .val.red {
+            color: #dc2626;
+        }
+
+        /* Edit section tabs */
+        .section-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .section-tab {
+            padding: 7px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-muted);
+            transition: all .15s;
+        }
+
+        .section-tab.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .edit-section {
+            display: none;
+        }
+
+        .edit-section.visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link"><i class="fas fa-car"></i> Vehicle
+                    Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i> Repair
+                    &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link"><i class="fas fa-shopping-cart"></i>
+                    Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link active"><i
+                        class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i>
+                    Profile</a></li>
+        </ul>
+        <div class="sidebar-footer"><a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i>
+                Logout</a></div>
+    </aside>
+
+    <!-- Main reports content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Reports &amp; Analytics</h1>
+                <p>Live business insights from Sales, Inventory &amp; Mechanic data</p>
+            </div>
+        </div>
+
+        <!-- Sales section -->
+        <div class="section-title"><i class="fas fa-shopping-cart" style="color:#3b82f6;margin-right:8px;"></i>Sales
+            Overview</div>
+
+        <!-- Top Metrics -->
+        <div class="metrics-grid metrics-grid-4">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Expenses</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalExpenses, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-red"><i class="fas fa-exclamation-circle"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Profit</h3>
+                    <div class="metric-value text-green" th:text="${'$' + #numbers.formatDecimal(totalProfit, 1, 2)}">$0
+                    </div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Avg Profit / Sale</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(avgProfitPerSale, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-percentage"></i></div>
+            </div>
+        </div>
+
+        <!-- Charts Row: Monthly Revenue/Profit + Buyer Type Pie -->
+        <div class="charts-grid-3">
+            <div class="chart-card">
+                <div class="chart-title">Monthly Revenue &amp; Profit (Last 6 Months)</div>
+                <div class="chart-container"><canvas id="profitRevenueChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Sales by Buyer Type</div>
+                <div class="chart-container"><canvas id="buyerTypeChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Detailed Profit Analysis Table -->
+        <div class="table-card">
+            <div class="table-header-bar">
+                <div class="table-title">Detailed Profit Analysis</div>
+                <span style="font-size:13px;color:var(--text-muted);" th:text="${totalSales + ' sales'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Buyer Type</th>
+                        <th>Date</th>
+                        <th>Purchase</th>
+                        <th>Repairs</th>
+                        <th>Sale Price</th>
+                        <th>Profit</th>
+                        <th>Margin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${profitRows}">
+                        <td style="font-weight:600;" th:text="${row.vehicle}">--</td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="${row.buyerType == 'REGULAR_CUSTOMER'} ? 'badge-regular' : (${row.buyerType == 'EXPORT'} ? 'badge-export' : 'badge-auction')"
+                                th:text="${row.buyerType == 'REGULAR_CUSTOMER'} ? 'Regular Customer' : (${row.buyerType == 'EXPORT'} ? 'Export' : 'Auction')">
+                                --</span>
+                        </td>
+                        <td th:text="${row.saleDate}">--</td>
+                        <td th:text="${'$' + row.purchase}">$0</td>
+                        <td th:text="${'$' + row.repair}">$0</td>
+                        <td th:text="${'$' + row.salePrice}">$0</td>
+                        <td class="font-semibold"
+                            th:classappend="${row.profit != null and row.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
+                            th:text="${'$' + row.profit}">$0</td>
+                        <td th:classappend="${row.margin != null and row.margin.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
+                            th:text="${row.margin + '%'}">0%</td>
+                    </tr>
+                    <tr th:if="${profitRows == null or profitRows.empty}">
+                        <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">No sales data
+                            yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- Inventory section -->
+        <div class="section-title"><i class="fas fa-car" style="color:#8b5cf6;margin-right:8px;"></i>Inventory Overview
+        </div>
+
+        <div class="inv-stat-row">
+            <div class="inv-stat">
+                <h4>Total Vehicles</h4>
+                <div class="val blue" th:text="${totalVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>In Stock (Unsold)</h4>
+                <div class="val green" th:text="${unsoldVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Sold</h4>
+                <div class="val orange" th:text="${soldVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Total Repairs Done</h4>
+                <div class="val" th:text="${totalRepairs}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Total Repair Cost</h4>
+                <div class="val red" th:text="${'$' + #numbers.formatDecimal(totalRepairCost, 1, 2)}">$0</div>
+            </div>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- Mechanic section -->
+        <div class="section-title"><i class="fas fa-tools" style="color:#f59e0b;margin-right:8px;"></i>Mechanic &amp;
+            Repair Overview</div>
+
+        <!-- Monthly Repair Cost Chart -->
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-title">Monthly Repair Costs (Last 6 Months)</div>
+            <div class="chart-container" style="height:220px;"><canvas id="repairCostChart"></canvas></div>
+        </div>
+
+        <!-- Recent Repairs Table -->
+        <div class="table-card">
+            <div class="table-header-bar">
+                <div class="table-title">Recent Repairs</div>
+                <span style="font-size:13px;color:var(--text-muted);"
+                    th:text="${totalRepairs + ' total repairs'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Cost</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${recentRepairs}">
+                        <td>
+                            <div style="font-weight:600;" th:text="${r.vehicle != null ? r.vehicle.vehicleModel : '--'}">
+                                --</div>
+                            <div style="font-size:12px;color:var(--text-muted);"
+                                th:text="${r.vehicle != null ? r.vehicle.licensePlate : ''}"></div>
+                        </td>
+                        <td style="max-width:200px;" th:text="${r.description}">--</td>
+                        <td>
+                            <span class="repair-badge badge-int" th:if="${r.repairType == 'INTERNAL'}">Internal</span>
+                            <span class="repair-badge badge-ext" th:if="${r.repairType == 'EXTERNAL'}">External</span>
+                            <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
+                                th:text="${r.repairType}">--</span>
+                        </td>
+                        <td style="font-weight:600;" th:text="${r.cost != null ? '$' + r.cost : '$0'}">$0</td>
+                        <td th:text="${r.repairDate}">--</td>
+                        <td>
+                            <span class="repair-badge badge-inspected-r"
+                                th:if="${r.status == 'INSPECTED'}">Inspected</span>
+                            <span class="repair-badge badge-pending-r" th:if="${r.status == 'PENDING'}">Pending</span>
+                            <span th:if="${r.status != 'INSPECTED' and r.status != 'PENDING'}"
+                                th:text="${r.status}">--</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${recentRepairs == null or recentRepairs.empty}">
+                        <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">No repair
+                            records yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- Edit records section (manager only) -->
+        <div class="section-title"><i class="fas fa-edit" style="color:#6366f1;margin-right:8px;"></i>Edit Records</div>
+
+        <div class="section-tabs">
+            <button class="section-tab active" onclick="showEditSection('repairEdit', this)">Repair Records</button>
+            <button class="section-tab" onclick="showEditSection('saleEdit', this)">Sale Records</button>
+        </div>
+
+        <!-- Repair edit table -->
+        <div id="repairEdit" class="edit-section visible">
+            <div class="table-card">
+                <div class="table-header-bar">
+                    <div class="table-title">Mechanic Repair Records</div>
+                    <span style="font-size:13px;color:var(--text-muted);"
+                        th:text="${repairs != null ? repairs.size() + ' records' : '0 records'}"></span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vehicle</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Cost</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="r : ${repairs}">
+                            <td>
+                                <div style="font-weight:600;"
+                                    th:text="${r.vehicle != null ? r.vehicle.vehicleModel : '--'}">Vehicle</div>
+                                <div style="font-size:12px;color:var(--info);"
+                                    th:text="${r.vehicle != null ? r.vehicle.licensePlate : ''}">Plate</div>
+                            </td>
+                            <td style="max-width:200px;" th:text="${r.description}">Description</td>
+                            <td>
+                                <span th:if="${r.repairType == 'INTERNAL'}" class="badge badge-onleave">Internal</span>
+                                <span th:if="${r.repairType == 'EXTERNAL'}" class="badge badge-warning"
+                                    style="background:#fef3c7;color:#f59e0b;">External</span>
+                                <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
+                                    th:text="${r.repairType}">--</span>
+                            </td>
+                            <td class="font-bold" th:text="${r.cost != null ? '$' + r.cost : '$0'}">$0</td>
+                            <td th:text="${r.repairDate}">Date</td>
+                            <td>
+                                <span th:if="${r.status == 'INSPECTED'}" class="badge badge-inspected">Inspected</span>
+                                <span th:if="${r.status == 'PENDING'}" class="badge badge-pending">Pending</span>
+                                <span th:if="${r.status != 'INSPECTED' and r.status != 'PENDING'}"
+                                    th:text="${r.status}">--</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline btn-sm" th:data-id="${r.id}"
+                                    th:data-desc="${r.description}" th:data-cost="${r.cost}"
+                                    th:data-type="${r.repairType}" th:data-status="${r.status}"
+                                    onclick="openRepairModalFromBtn(this)">
+                                    <i class="fas fa-pencil-alt"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${repairs == null or repairs.empty}">
+                            <td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">No repair
+                                records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sale edit table -->
+        <div id="saleEdit" class="edit-section">
+            <div class="table-card">
+                <div class="table-header-bar">
+                    <div class="table-title">Sales Records</div>
+                    <span style="font-size:13px;color:var(--text-muted);" th:text="${totalSales + ' records'}"></span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vehicle</th>
+                            <th>Customer</th>
+                            <th>Buyer Type</th>
+                            <th>Sale Price</th>
+                            <th>Profit</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${sales}">
+                            <td>
+                                <div style="font-weight:600;"
+                                    th:text="${s.vehicle != null ? s.vehicle.vehicleModel : '--'}">Vehicle</div>
+                                <div style="font-size:12px;color:var(--info);"
+                                    th:text="${s.vehicle != null ? s.vehicle.licensePlate : ''}">Plate</div>
+                            </td>
+                            <td>
+                                <div style="font-weight:600;"
+                                    th:text="${s.customerName != null ? s.customerName : '--'}">Customer</div>
+                                <div style="font-size:12px;color:var(--text-muted);"
+                                    th:text="${s.email != null ? s.email : ''}">email</div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background:#dbeafe;color:#1d4ed8;"
+                                    th:text="${s.buyerType != null ? s.buyerType.name() : '--'}">Type
+                                </span>
+                            </td>
+                            <td class="font-bold" th:text="${s.salePrice != null ? '$' + s.salePrice : '--'}">$0</td>
+                            <td>
+                                <span
+                                    th:if="${s.profit != null and s.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0}"
+                                    class="text-green" th:text="${'$' + s.profit}">$0</span>
+                                <span
+                                    th:if="${s.profit != null and s.profit.compareTo(T(java.math.BigDecimal).ZERO) < 0}"
+                                    class="text-red" th:text="${'$' + s.profit}">$0</span>
+                            </td>
+                            <td th:text="${s.saleDate}">Date</td>
+                            <td>
+                                <span th:if="${s.saleStatus == 'FINALIZED'}"
+                                    class="badge badge-finalized">Finalized</span>
+                                <span th:if="${s.saleStatus == 'DRAFT'}" class="badge badge-draft">Draft</span>
+                                <span th:if="${s.saleStatus != 'FINALIZED' and s.saleStatus != 'DRAFT'}"
+                                    th:text="${s.saleStatus}" class="badge badge-draft">--</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline btn-sm" th:data-id="${s.id}"
+                                    th:data-price="${s.salePrice}" th:data-status="${s.saleStatus}"
+                                    th:data-buyer="${s.buyerType != null ? s.buyerType.name() : ''}"
+                                    th:data-customer="${s.customerName}" onclick="openSaleModalFromBtn(this)">
+                                    <i class="fas fa-pencil-alt"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${sales == null or sales.empty}">
+                            <td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px;">No sales
+                                records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Edit Repair Modal -->
+    <div id="repairModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Edit Repair Record</div>
+                    <div class="modal-subtitle">Update repair details below.</div>
+                </div>
+                <button class="modal-close" onclick="closeRepairModal()">&times;</button>
+            </div>
+            <form id="repairForm" method="post">
+                <div class="form-group-modal">
+                    <label class="form-label">Description</label>
+                    <input type="text" name="description" id="repair-desc" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group-modal">
+                        <label class="form-label">Cost ($)</label>
+                        <input type="number" name="cost" id="repair-cost" class="form-control" step="0.01" min="0"
+                            required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label class="form-label">Repair Type</label>
+                        <select name="repairType" id="repair-type" class="form-control">
+                            <option value="INTERNAL">Internal</option>
+                            <option value="EXTERNAL">External</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group-modal">
+                    <label class="form-label">Status</label>
+                    <select name="status" id="repair-status" class="form-control">
+                        <option value="PENDING">Pending</option>
+                        <option value="INSPECTED">Inspected</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeRepairModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Sale Modal -->
+    <div id="saleModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Edit Sale Record</div>
+                    <div class="modal-subtitle">Update sale details below.</div>
+                </div>
+                <button class="modal-close" onclick="closeSaleModal()">&times;</button>
+            </div>
+            <form id="saleForm" method="post">
+                <div class="form-row">
+                    <div class="form-group-modal">
+                        <label class="form-label">Sale Price ($)</label>
+                        <input type="number" name="salePrice" id="sale-price" class="form-control" step="0.01" min="0"
+                            required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label class="form-label">Sale Status</label>
+                        <select name="saleStatus" id="sale-status" class="form-control">
+                            <option value="DRAFT">Draft</option>
+                            <option value="FINALIZED">Finalized</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group-modal">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" name="customerName" id="sale-customer" class="form-control" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label class="form-label">Buyer Type</label>
+                        <select name="buyerType" id="sale-buyer" class="form-control">
+                            <option th:each="bt : ${buyerTypes}" th:value="${bt.name()}" th:text="${bt.name()}">Type
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeSaleModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Data from server
+        const monthLabels = /*[[${monthLabels}]]*/[];
+        const monthlyRevenue = /*[[${monthlyRevenue}]]*/[];
+        const monthlyProfit = /*[[${monthlyProfit}]]*/[];
+        const monthlyRepairCost = /*[[${monthlyRepairCost}]]*/[];
+        const buyerTypeLabels = /*[[${buyerTypeLabels}]]*/[];
+        const buyerTypeValues = /*[[${buyerTypeValues}]]*/[];
+
+        const btFriendly = buyerTypeLabels.map(l =>
+            l === 'REGULAR_CUSTOMER' ? 'Regular Customer' : (l === 'EXPORT' ? 'Export' : 'Auction'));
+
+        // Monthly revenue and profit chart
+        new Chart(document.getElementById('profitRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    { label: 'Revenue', data: monthlyRevenue, backgroundColor: '#3b82f6', borderRadius: 4 },
+                    { label: 'Profit', data: monthlyProfit, backgroundColor: '#10b981', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '$' + v.toLocaleString() } }
+                }
+            }
+        });
+
+        // Buyer type pie chart
+        new Chart(document.getElementById('buyerTypeChart'), {
+            type: 'pie',
+            data: {
+                labels: btFriendly,
+                datasets: [{ data: buyerTypeValues, backgroundColor: ['#f59e0b', '#10b981', '#3b82f6'], borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.raw + ' sale(s)' } }
+                }
+            }
+        });
+
+        // Monthly repair cost chart
+        new Chart(document.getElementById('repairCostChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [{ label: 'Repair Cost', data: monthlyRepairCost, backgroundColor: '#f59e0b', borderRadius: 4 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '$' + v.toLocaleString() } }
+                }
+            }
+        });
+
+        // Edit section tab toggle
+        function showEditSection(id, btn) {
+            document.querySelectorAll('.edit-section').forEach(el => el.classList.remove('visible'));
+            document.querySelectorAll('.section-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('visible');
+            btn.classList.add('active');
+        }
+
+        // Repair modal
+        function openRepairModalFromBtn(btn) {
+            const d = btn.dataset;
+            document.getElementById('repairForm').action = '/manager/reports/repair/edit/' + d.id;
+            document.getElementById('repair-desc').value = d.desc || '';
+            document.getElementById('repair-cost').value = d.cost || '';
+            document.getElementById('repair-type').value = d.type || '';
+            document.getElementById('repair-status').value = d.status || '';
+            document.getElementById('repairModal').classList.add('active');
+        }
+        function closeRepairModal() { document.getElementById('repairModal').classList.remove('active'); }
+
+        // Sale modal
+        function openSaleModalFromBtn(btn) {
+            const d = btn.dataset;
+            document.getElementById('saleForm').action = '/manager/reports/sale/edit/' + d.id;
+            document.getElementById('sale-price').value = d.price || '';
+            document.getElementById('sale-status').value = d.status || '';
+            document.getElementById('sale-buyer').value = d.buyer || '';
+            document.getElementById('sale-customer').value = d.customer || '';
+            document.getElementById('saleModal').classList.add('active');
+        }
+        function closeSaleModal() { document.getElementById('saleModal').classList.remove('active'); }
+
+        ['repairModal', 'saleModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', function (e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+
+</html>

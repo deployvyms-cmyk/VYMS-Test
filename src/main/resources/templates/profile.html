@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="profile-body"
+    th:classappend="${userProfile != null && userProfile.role != null ? ' role-' + userProfile.role.name().toLowerCase() : ''}">
+    <!-- Toast messages for success or error -->
+    <div class="toast-stack">
+        <div class="toast toast-success" th:if="${successMsg}" th:text="${successMsg}">Profile updated successfully.
+        </div>
+        <div class="toast toast-error" th:if="${errorMsg}" th:text="${errorMsg}">Error</div>
+    </div>
+
+    <!-- Main profile content -->
+    <main class="profile-page">
+        <!-- Header with title and back link -->
+        <header class="profile-header">
+            <div class="profile-title">
+                <h1>User Profile</h1>
+                <p class="subtitle" th:text="${userProfile != null ? 'Signed in as ' + userProfile.username : ''}">Signed in
+                    as</p>
+            </div>
+            <div class="profile-actions">
+                <a class="btn btn-outline" th:href="@{${dashboardPath}}"><i class="fas fa-arrow-left"></i> Back to
+                    Dashboard</a>
+            </div>
+        </header>
+
+        <!-- Profile hero card -->
+        <section class="profile-hero">
+            <div class="profile-avatar" aria-hidden="true">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-meta">
+                <h2 th:text="${userProfile.username}">User Name</h2>
+                <p class="profile-role" th:text="${userProfile.role != null ? userProfile.role.name() : ''}">ROLE</p>
+                <p class="profile-email" th:text="${userProfile.email}">user@email.com</p>
+            </div>
+        </section>
+
+        <!-- Editable account details form -->
+        <section class="profile-card">
+            <div class="card-header">
+                <div>
+                    <h2>Account Details</h2>
+                    <p class="card-hint">Update your personal details and security settings.</p>
+                </div>
+            </div>
+            <form th:action="@{/profile}" method="post">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">Full Name</label>
+                        <input id="username" name="username" type="text" th:value="${userProfile.username}" required
+                            minlength="2" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" th:value="${userProfile.email}" required>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3 class="section-title">Security</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input id="currentPassword" name="currentPassword" type="password"
+                            placeholder="Required to change password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input id="newPassword" name="newPassword" type="password" minlength="8"
+                            placeholder="Leave blank to keep current password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input id="confirmPassword" name="confirmPassword" type="password" minlength="8"
+                            placeholder="Repeat new password">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>

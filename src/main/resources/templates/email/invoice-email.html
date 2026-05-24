@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Email</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background-color: #f6f8fb; margin: 0; padding: 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden;">
+        <tr>
+            <td style="background: #1f5eff; color: #ffffff; padding: 20px 24px;">
+                <h2 style="margin: 0; font-size: 20px;">Vehicle Yard Management System</h2>
+                <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Invoice Notification</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 24px;">
+                <h3 style="margin-top: 0;">Invoice <span th:text="${invoiceNumber}">INV-0</span></h3>
+                <p style="margin: 6px 0 16px; color: #555;">
+                    Thank you for your purchase. Here is a summary of your invoice.
+                </p>
+
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">Vehicle</td>
+                        <td style="padding: 8px 0; text-align: right;" th:text="${sale.vehicle != null ? sale.vehicle.vehicleModel : 'Vehicle'}">Vehicle</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;">Chassis</td>
+                        <td style="padding: 8px 0; text-align: right;" th:text="${sale.vehicle != null ? sale.vehicle.chassisNumber : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;">Plate</td>
+                        <td style="padding: 8px 0; text-align: right;" th:text="${sale.vehicle != null ? sale.vehicle.licensePlate : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">Sale Price</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;" th:text="${'$' + sale.salePrice}">$0</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e6e9ef; color: #666; font-size: 13px;">
+                    <p style="margin: 0;">If you have any questions, please contact the sales team.</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
+

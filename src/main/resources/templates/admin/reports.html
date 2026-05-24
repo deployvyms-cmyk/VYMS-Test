@@ -1,0 +1,474 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reports &amp; Analytics - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Extra report page styles */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .metrics-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .metrics-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .charts-grid-3 {
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            display: grid;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 14px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+
+        .divider-section {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 28px 0 20px;
+        }
+
+        .badge-regular {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-export {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-auction {
+            background: #fef9c3;
+            color: #e1a014;
+        }
+
+        .text-green {
+            color: #16a34a;
+        }
+
+        .text-red {
+            color: #dc2626;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .repair-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-int {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-ext {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-pending {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .badge-inspected {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .inv-stat-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .inv-stat {
+            flex: 1;
+            min-width: 130px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+        }
+
+        .inv-stat h4 {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .inv-stat .val {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .inv-stat .val.green {
+            color: #16a34a;
+        }
+
+        .inv-stat .val.blue {
+            color: #2563eb;
+        }
+
+        .inv-stat .val.orange {
+            color: #d97706;
+        }
+
+        .inv-stat .val.red {
+            color: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">AU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Admin User'}">Admin User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Admin'}">Admin</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/admin}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li class="nav-item"><a th:href="@{/admin/users}" class="nav-link"><i class="fas fa-users"></i> Manage
+                    Users</a></li>
+            <li class="nav-item"><a th:href="@{/admin/reports}" class="nav-link active"><i class="fas fa-file-alt"></i>
+                    Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i>
+                    Profile</a></li>
+        </ul>
+        <div class="sidebar-footer"><a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i>
+                Logout</a></div>
+    </aside>
+
+    <!-- Main reports content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Reports &amp; Analytics</h1>
+                <p>Live business insights from Sales, Inventory &amp; Mechanic data</p>
+            </div>
+            <a th:href="@{/admin/reports/download}" class="btn btn-primary" style="text-decoration:none;background:#6366f1;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fas fa-file-pdf"></i> Download Full Report
+            </a>
+        </div>
+
+        <!-- Sales section -->
+        <div class="section-title"><i class="fas fa-shopping-cart" style="color:#3b82f6;margin-right:8px;"></i>Sales
+            Overview</div>
+
+        <!-- Metrics summary -->
+        <div class="metrics-grid metrics-grid-4">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Expenses</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalExpenses, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-red"><i class="fas fa-exclamation-circle"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Profit</h3>
+                    <div class="metric-value text-green" th:text="${'$' + #numbers.formatDecimal(totalProfit, 1, 2)}">$0
+                    </div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Avg Profit / Sale</h3>
+                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(avgProfitPerSale, 1, 2)}">$0</div>
+                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-percentage"></i></div>
+            </div>
+        </div>
+
+        <!-- Charts and KPI breakdowns -->
+        <div class="charts-grid-3">
+            <div class="chart-card">
+                <div class="chart-title">Monthly Revenue &amp; Profit (Last 6 Months)</div>
+                <div class="chart-container"><canvas id="profitRevenueChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Sales by Buyer Type</div>
+                <div class="chart-container"><canvas id="buyerTypeChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Detailed Profit Analysis Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <div class="table-title">Detailed Profit Analysis</div>
+                <span style="font-size:13px;color:var(--text-muted);" th:text="${totalSales + ' sales'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Buyer Type</th>
+                        <th>Date</th>
+                        <th>Purchase</th>
+                        <th>Repairs</th>
+                        <th>Sale Price</th>
+                        <th>Profit</th>
+                        <th>Margin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${profitRows}">
+                        <td style="font-weight:600;" th:text="${row.vehicle}">--</td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="${row.buyerType == 'REGULAR_CUSTOMER'} ? 'badge-regular' : (${row.buyerType == 'EXPORT'} ? 'badge-export' : 'badge-auction')"
+                                th:text="${row.buyerType == 'REGULAR_CUSTOMER'} ? 'Regular Customer' : (${row.buyerType == 'EXPORT'} ? 'Export' : 'Auction')">
+                                --</span>
+                        </td>
+                        <td th:text="${row.saleDate}">--</td>
+                        <td th:text="${'$' + row.purchase}">$0</td>
+                        <td th:text="${'$' + row.repair}">$0</td>
+                        <td th:text="${'$' + row.salePrice}">$0</td>
+                        <td class="font-semibold"
+                            th:classappend="${row.profit != null and row.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
+                            th:text="${'$' + row.profit}">$0</td>
+                        <td th:classappend="${row.margin != null and row.margin.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
+                            th:text="${row.margin + '%'}">0%</td>
+                    </tr>
+                    <tr th:if="${profitRows == null or profitRows.empty}">
+                        <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">No sales data
+                            yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- Inventory section -->
+        <div class="section-title"><i class="fas fa-car" style="color:#8b5cf6;margin-right:8px;"></i>Inventory Overview
+        </div>
+
+        <div class="inv-stat-row">
+            <div class="inv-stat">
+                <h4>Total Vehicles</h4>
+                <div class="val blue" th:text="${totalVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>In Stock (Unsold)</h4>
+                <div class="val green" th:text="${unsoldVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Sold</h4>
+                <div class="val orange" th:text="${soldVehicles}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Total Repairs Done</h4>
+                <div class="val" th:text="${totalRepairs}">0</div>
+            </div>
+            <div class="inv-stat">
+                <h4>Total Repair Cost</h4>
+                <div class="val red" th:text="${'$' + #numbers.formatDecimal(totalRepairCost, 1, 2)}">$0</div>
+            </div>
+        </div>
+
+        <hr class="divider-section">
+
+        <!-- Mechanic section -->
+        <div class="section-title"><i class="fas fa-tools" style="color:#f59e0b;margin-right:8px;"></i>Mechanic &amp;
+            Repair Overview</div>
+
+        <!-- Monthly Repair Cost Chart -->
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-title">Monthly Repair Costs (Last 6 Months)</div>
+            <div class="chart-container" style="height:220px;"><canvas id="repairCostChart"></canvas></div>
+        </div>
+
+        <!-- Recent Repairs Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <div class="table-title">Recent Repairs</div>
+                <span style="font-size:13px;color:var(--text-muted);"
+                    th:text="${totalRepairs + ' total repairs'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Cost</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${recentRepairs}">
+                        <td>
+                            <div style="font-weight:600;" th:text="${r.vehicle != null ? r.vehicle.vehicleModel : '--'}">
+                                --</div>
+                            <div style="font-size:12px;color:var(--text-muted);"
+                                th:text="${r.vehicle != null ? r.vehicle.licensePlate : ''}"></div>
+                        </td>
+                        <td style="max-width:200px;" th:text="${r.description}">--</td>
+                        <td>
+                            <span class="repair-badge badge-int" th:if="${r.repairType == 'INTERNAL'}">Internal</span>
+                            <span class="repair-badge badge-ext" th:if="${r.repairType == 'EXTERNAL'}">External</span>
+                            <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
+                                th:text="${r.repairType}">--</span>
+                        </td>
+                        <td style="font-weight:600;" th:text="${r.cost != null ? '$' + r.cost : '$0'}">$0</td>
+                        <td th:text="${r.repairDate}">--</td>
+                        <td>
+                            <span class="repair-badge badge-inspected"
+                                th:if="${r.status == 'INSPECTED'}">Inspected</span>
+                            <span class="repair-badge badge-pending" th:if="${r.status == 'PENDING'}">Pending</span>
+                            <span th:if="${r.status != 'INSPECTED' and r.status != 'PENDING'}"
+                                th:text="${r.status}">--</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${recentRepairs == null or recentRepairs.empty}">
+                        <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">No repair
+                            records yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Data from server
+        const monthLabels = /*[[${monthLabels}]]*/[];
+        const monthlyRevenue = /*[[${monthlyRevenue}]]*/[];
+        const monthlyProfit = /*[[${monthlyProfit}]]*/[];
+        const monthlyRepairCost = /*[[${monthlyRepairCost}]]*/[];
+        const buyerTypeLabels = /*[[${buyerTypeLabels}]]*/[];
+        const buyerTypeValues = /*[[${buyerTypeValues}]]*/[];
+
+        // Map buyer type keys to friendly labels
+        const btFriendly = buyerTypeLabels.map(l =>
+            l === 'REGULAR_CUSTOMER' ? 'Regular Customer' : (l === 'EXPORT' ? 'Export' : 'Auction'));
+
+        // Monthly revenue and profit chart
+        new Chart(document.getElementById('profitRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    { label: 'Revenue', data: monthlyRevenue, backgroundColor: '#3b82f6', borderRadius: 4 },
+                    { label: 'Profit', data: monthlyProfit, backgroundColor: '#10b981', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true, grid: { color: '#f1f5f9' },
+                        ticks: { callback: v => '$' + v.toLocaleString() }
+                    }
+                }
+            }
+        });
+
+        // Buyer type pie chart
+        new Chart(document.getElementById('buyerTypeChart'), {
+            type: 'pie',
+            data: {
+                labels: btFriendly,
+                datasets: [{
+                    data: buyerTypeValues,
+                    backgroundColor: ['#e3c922', '#10b981', '#3b82f6'],
+                    borderWidth: 2, borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.raw + ' sale(s)' } }
+                }
+            }
+        });
+
+        // Monthly repair cost chart
+        new Chart(document.getElementById('repairCostChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: 'Repair Cost',
+                    data: monthlyRepairCost,
+                    backgroundColor: '#09e481', borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true, grid: { color: '#f1f5f9' },
+                        ticks: { callback: v => '$' + v.toLocaleString() }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

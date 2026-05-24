@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Management - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/manager.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .badge-regular {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .badge-export {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .badge-auction {
+            background: #ede9fe;
+            color: #5b21b6;
+            border: 1px solid #ddd6fe;
+        }
+
+        .badge-finalized {
+            background: #ecfdf3;
+            color: #166534;
+            border: 1px solid #d1fae5;
+        }
+
+        .badge-draft {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .text-profit {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .text-loss {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .profit-indicator {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .profit-indicator.green {
+            background: #ecfdf3;
+            color: #15803d;
+            border: 1px solid #d1fae5;
+        }
+
+        .profit-indicator.red {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .investment-box {
+            background: #f8fafc;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-main, #0f172a);
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .modal-divider {
+            border: 0;
+            height: 1px;
+            background: var(--border, #e2e8f0);
+            margin: 20px 0;
+        }
+
+        .contact-entry {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted, #64748b);
+        }
+
+        .customer-email {
+            font-size: 11px;
+            color: var(--text-muted, #64748b);
+            word-break: break-all;
+        }
+
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-green:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link"><i class="fas fa-car"></i> Vehicle Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i> Repair &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link active"><i class="fas fa-shopping-cart"></i> Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link"><i class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Sales Management</h1>
+                <p>Record vehicle sales, manage customers, and send invoice emails</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <a th:href="@{/manager/sales/download}" class="btn btn-outline">
+                    <i class="fas fa-file-pdf"></i> Download PDF Report
+                </a>
+                <button class="btn btn-primary" onclick="openRecordModal()">
+                    <i class="fas fa-plus"></i> Record Sale
+                </button>
+            </div>
+        </div>
+
+        <div th:if="${errorMsg}" class="page-alert page-alert-error" style="margin-bottom:16px;">
+            <i class="fas fa-circle-exclamation"></i>
+            <span th:text="${errorMsg}">Error message</span>
+        </div>
+        <div th:if="${successMsg}" class="page-alert page-alert-success" style="margin-bottom:16px;">
+            <i class="fas fa-circle-check"></i>
+            <span th:text="${successMsg}">Success message</span>
+        </div>
+
+        <!-- Metrics summary -->
+        <div class="metrics-grid metrics-grid-3" style="margin-bottom: 24px;">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Sales</h3>
+                    <div class="metric-value" th:text="${totalSales}">0</div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalRevenue, 1, 2)}">$0.00</div>
+                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Available Vehicles</h3>
+                    <div class="metric-value" th:text="${availableVehicles}">0</div>
+                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-car"></i></div>
+            </div>
+        </div>
+
+        <!-- Sales Records Table -->
+        <div class="table-card">
+            <div class="table-header-bar">
+                <div class="table-title">Sales Records</div>
+                <span style="font-size:13px;color:var(--text-muted);"
+                    th:text="${sales != null ? sales.size() + ' records' : '0 records'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Buyer Type</th>
+                        <th>Customer / Company</th>
+                        <th>Contact / Info</th>
+                        <th>Sale Price</th>
+                        <th>Profit/Loss</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Invoicing</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sale : ${sales}">
+                        <td>
+                            <div style="font-weight:600;" th:text="${sale.vehicle != null ? sale.vehicle.vehicleModel : 'Unknown'}">Model</div>
+                            <div style="font-size:12px;color:var(--info);" th:text="${sale.vehicle != null ? sale.vehicle.licensePlate : ''}">Plate</div>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'badge-regular' : (sale.buyerType.name() == 'EXPORT' ? 'badge-export' : 'badge-auction')) : 'badge-draft'}"
+                                th:text="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'Regular' : (sale.buyerType.name() == 'EXPORT' ? 'Export' : 'Auction')) : '-'}">Type</span>
+                        </td>
+                        <td>
+                            <div th:if="${sale.buyerType == null or sale.buyerType.name() == 'REGULAR_CUSTOMER'}">
+                                <div style="font-weight:600;" th:text="${sale.customerName != null ? sale.customerName : 'N/A'}">Name</div>
+                                <div class="customer-email" th:if="${sale.email != null and !#strings.isEmpty(sale.email)}" th:text="${sale.email}">email</div>
+                            </div>
+                            <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'EXPORT'}">
+                                <div style="font-weight:600;" th:text="${sale.companyName != null ? sale.companyName : 'N/A'}">Company</div>
+                                <div class="customer-email" th:if="${sale.email != null and !#strings.isEmpty(sale.email)}" th:text="${sale.email}">email</div>
+                            </div>
+                            <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'AUCTION'}">
+                                <div style="font-weight:600;" th:text="${sale.auctionHouseName != null ? sale.auctionHouseName : 'N/A'}">Auction House</div>
+                                <div class="customer-email" th:if="${sale.lotNumber != null and !#strings.isEmpty(sale.lotNumber)}" th:text="|Lot: ${sale.lotNumber}|">lot</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="contact-entry" th:if="${sale.buyerType == null or sale.buyerType.name() == 'REGULAR_CUSTOMER'}">
+                                <i class="fas fa-phone"></i>
+                                <span th:text="${sale.contactNumber != null and !#strings.isEmpty(sale.contactNumber) ? sale.contactNumber : '--'}">Contact</span>
+                            </span>
+                            <span class="contact-entry" th:if="${sale.buyerType != null and sale.buyerType.name() == 'EXPORT'}">
+                                <i class="fas fa-globe"></i>
+                                <span th:text="${sale.exportCountry != null and !#strings.isEmpty(sale.exportCountry) ? sale.exportCountry : '--'}">Country</span>
+                            </span>
+                            <span class="contact-entry" th:if="${sale.buyerType != null and sale.buyerType.name() == 'AUCTION'}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${sale.location != null and !#strings.isEmpty(sale.location) ? sale.location : '--'}">Location</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="font-bold" th:text="${'$' + #numbers.formatDecimal(sale.salePrice, 1, 2)}">$0.00</span>
+                        </td>
+                        <td>
+                            <span th:if="${sale.profit != null}"
+                                th:classappend="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-profit' : 'text-loss'"
+                                th:text="${(sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0) ? '+$' + #numbers.formatDecimal(sale.profit, 1, 2) : '-$' + #numbers.formatDecimal(sale.profit.abs(), 1, 2)}">$0.00</span>
+                        </td>
+                        <td th:text="${sale.saleDate}">Date</td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="${sale.saleStatus != null and sale.saleStatus.equalsIgnoreCase('FINALIZED')} ? 'badge-finalized' : 'badge-draft'"
+                                th:text="${sale.saleStatus != null ? sale.saleStatus : 'Draft'}">Status</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <a th:if="${sale.email != null and !sale.email.isEmpty()}" th:href="@{/manager/sales/invoice/{id}/send(id=${sale.id})}" class="btn btn-outline btn-sm" style="font-size:11px; padding:4px 8px; justify-content:center;">
+                                    <i class="fas fa-paper-plane"></i> Email Invoice
+                                </a>
+                                <a th:if="${sale.email != null and !sale.email.isEmpty()}" th:href="@{/manager/sales/invoice/{id}/resend(id=${sale.id})}" class="btn btn-outline btn-sm" style="font-size:11px; padding:4px 8px; justify-content:center; color:var(--text-muted);">
+                                    <i class="fas fa-redo"></i> Resend
+                                </a>
+                                <span th:unless="${sale.email != null and !sale.email.isEmpty()}" style="font-size:11px; color:var(--text-muted); text-align:center;">No Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="openEditModal(this)" th:data-id="${sale.id}"
+                                th:data-price="${sale.salePrice != null ? sale.salePrice : 0}"
+                                th:data-buyer="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}"
+                                th:data-customer="${sale.customerName != null ? sale.customerName : ''}"
+                                th:data-contact="${sale.contactNumber != null ? sale.contactNumber : ''}"
+                                th:data-email="${sale.email != null ? sale.email : ''}"
+                                th:data-company="${sale.companyName != null ? sale.companyName : ''}"
+                                th:data-country="${sale.exportCountry != null ? sale.exportCountry : ''}"
+                                th:data-auction="${sale.auctionHouseName != null ? sale.auctionHouseName : ''}"
+                                th:data-location="${sale.location != null ? sale.location : ''}"
+                                th:data-lot="${sale.lotNumber != null ? sale.lotNumber : ''}"
+                                th:data-status="${sale.saleStatus != null ? sale.saleStatus : 'FINALIZED'}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(sales)}">
+                        <td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            No sales recorded yet. Click "Record Sale" to get started.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Record Sale Modal -->
+    <div class="modal-overlay" id="recordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Record New Sale</h2>
+                    <p class="modal-subtitle">Enter the vehicle specification and client info.</p>
+                </div>
+                <button class="modal-close" onclick="closeRecordModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <form id="recordForm" th:action="@{/manager/sales/record}" method="post">
+                <div class="form-group">
+                    <label class="form-label">Select Vehicle</label>
+                    <select name="vehicleId" id="vehicleSelect" class="form-control" required
+                        onchange="loadVehicleData(this.value)">
+                        <option value="" disabled selected>Choose a vehicle</option>
+                        <option th:each="v : ${vehicles}" th:value="${v.id}"
+                            th:text="${(v.vehicleModel != null ? v.vehicleModel : 'Vehicle ' + v.id) + ' -- ' + (v.licensePlate != null ? v.licensePlate : '')}">
+                            Vehicle</option>
+                    </select>
+                </div>
+
+                <!-- Investment summary box -->
+                <div class="investment-box" id="investmentBox">
+                    Purchase Price: $<span id="purchasePriceDisplay">0.00</span><br>
+                    Repair Costs: $<span id="repairCostDisplay">0.00</span><br>
+                    <strong>Total Investment: $<span id="totalInvestmentDisplay">0.00</span></strong>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Buyer Type</label>
+                        <select name="buyerType" id="recBuyerType" class="form-control" required onchange="toggleBuyerFields('rec', this.value)">
+                            <option value="REGULAR_CUSTOMER">Regular Customer</option>
+                            <option value="EXPORT">Export</option>
+                            <option value="AUCTION">Auction</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Sale Price</label>
+                        <input type="number" name="salePrice" id="salePriceInput" class="form-control"
+                            placeholder="0.00" step="0.01" min="0" required oninput="calcProfit()">
+                        <span class="field-error" id="err-rec-sale"></span>
+                    </div>
+                </div>
+
+                <!-- Profit/Loss Indicator -->
+                <div class="profit-indicator" id="profitIndicator"></div>
+
+                <hr class="modal-divider">
+                <p style="font-size:14px; font-weight:600; margin-bottom:14px; color:var(--text-muted);">Buyer Details</p>
+
+                <div id="rec-regular-fields">
+                    <div class="form-group">
+                        <label class="form-label">Customer Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="customerName" id="recCustomerName" class="form-control" placeholder="John Doe" minlength="2" maxlength="100">
+                        <span class="field-error" id="err-rec-name"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
+                            <input type="tel" name="contactNumber" id="recContactNumber" class="form-control" placeholder="07XXXXXXXX">
+                            <span class="field-error" id="err-rec-contact"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Email (Optional)</label>
+                            <input type="email" name="email" id="recEmail" class="form-control" placeholder="customer@email.com">
+                            <span class="field-error" id="err-rec-email"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rec-export-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Company Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyName" id="recCompanyName" class="form-control" placeholder="Global Auto Exports">
+                        <span class="field-error" id="err-rec-company"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Export Country <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="exportCountry" id="recExportCountry" class="form-control" placeholder="Japan" list="countryList" autocomplete="off">
+                            <span class="field-error" id="err-rec-country"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Contact Email (Optional)</label>
+                            <input type="email" name="email" id="recExportEmail" class="form-control" placeholder="contact@company.com">
+                            <span class="field-error" id="err-rec-export-email"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rec-auction-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Auction House Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="auctionHouseName" id="recAuctionHouseName" class="form-control" placeholder="National Auto Auction">
+                        <span class="field-error" id="err-rec-auction"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Location <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="location" id="recLocation" class="form-control" placeholder="Colombo 03">
+                            <span class="field-error" id="err-rec-location"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Lot Number (Optional)</label>
+                            <input type="text" name="lotNumber" id="recLotNumber" class="form-control" placeholder="L-4092">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeRecordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-green">Finalize Sale</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Sale Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Edit Sale Record</h2>
+                    <p class="modal-subtitle">Update the existing sale information below.</p>
+                </div>
+                <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm" method="post">
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Buyer Type</label>
+                        <select name="buyerType" id="editBuyerType" class="form-control" required onchange="toggleBuyerFields('edit', this.value)">
+                            <option value="REGULAR_CUSTOMER">Regular Customer</option>
+                            <option value="EXPORT">Export</option>
+                            <option value="AUCTION">Auction</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Sale Price</label>
+                        <input type="number" name="salePrice" id="editSalePrice" class="form-control" placeholder="0.00"
+                            step="0.01" min="0" required>
+                        <span class="field-error" id="err-edit-sale"></span>
+                    </div>
+                </div>
+                <hr class="modal-divider">
+                <p style="font-size:14px; font-weight:600; margin-bottom:14px; color:var(--text-muted);">Buyer Details</p>
+
+                <div id="edit-regular-fields">
+                    <div class="form-group">
+                        <label class="form-label">Customer Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="customerName" id="editCustomerName" class="form-control" maxlength="100">
+                        <span class="field-error" id="err-edit-name"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
+                            <input type="tel" name="contactNumber" id="editContactNumber" class="form-control" placeholder="07XXXXXXXX">
+                            <span class="field-error" id="err-edit-contact"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Email (Optional)</label>
+                            <input type="email" name="email" id="editEmail" class="form-control" placeholder="customer@email.com">
+                            <span class="field-error" id="err-edit-email"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="edit-export-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Company Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyName" id="editCompanyName" class="form-control" placeholder="Global Auto Exports">
+                        <span class="field-error" id="err-edit-company"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Export Country <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="exportCountry" id="editExportCountry" class="form-control" placeholder="Japan" list="countryList" autocomplete="off">
+                            <span class="field-error" id="err-edit-country"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Contact Email (Optional)</label>
+                            <input type="email" name="email" id="editExportEmail" class="form-control" placeholder="contact@company.com">
+                            <span class="field-error" id="err-edit-export-email"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="edit-auction-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Auction House Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="auctionHouseName" id="editAuctionHouseName" class="form-control" placeholder="National Auto Auction">
+                        <span class="field-error" id="err-edit-auction"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Location <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="location" id="editLocation" class="form-control" placeholder="Colombo 03">
+                            <span class="field-error" id="err-edit-location"></span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Lot Number (Optional)</label>
+                            <input type="text" name="lotNumber" id="editLotNumber" class="form-control" placeholder="L-4092">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select name="saleStatus" id="editSaleStatus" class="form-control">
+                        <option value="DRAFT">Draft</option>
+                        <option value="FINALIZED">Finalized</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-green"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .field-error {
+            display: block;
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+    </style>
+
+    <datalist id="countryList">
+        <option value="Sri Lanka"></option>
+        <option value="India"></option>
+        <option value="Japan"></option>
+        <option value="United Arab Emirates"></option>
+        <option value="United Kingdom"></option>
+        <option value="United States"></option>
+        <option value="Singapore"></option>
+        <option value="Australia"></option>
+    </datalist>
+
+    <script>
+        function toggleBuyerFields(prefix, type) {
+            const sections = ['regular', 'export', 'auction'];
+            sections.forEach(section => {
+                const container = document.getElementById(prefix + '-' + section + '-fields');
+                if (!container) return;
+                const active =
+                    (section === 'regular' && type === 'REGULAR_CUSTOMER') ||
+                    (section === 'export' && type === 'EXPORT') ||
+                    (section === 'auction' && type === 'AUCTION');
+                container.style.display = active ? 'block' : 'none';
+                container.querySelectorAll('input, select, textarea').forEach(input => {
+                    input.disabled = !active;
+                });
+            });
+        }
+
+        function setError(id, msg) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = msg;
+        }
+
+        function clearErrors(prefix) {
+            document.querySelectorAll('[id^=err-' + prefix + '-]').forEach(el => {
+                el.textContent = '';
+            });
+        }
+
+        function isValidEmail(value) {
+            if (!value) return true;
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+        }
+
+        function isValidPhone(value) {
+            if (!value) return false;
+            return /^(\+?94|0)?7\d{8}$/.test(value.trim());
+        }
+
+        function validateSale(prefix) {
+            clearErrors(prefix);
+
+            const buyer = (document.getElementById(prefix + 'BuyerType') || {}).value || 'REGULAR_CUSTOMER';
+            const salePriceInput = document.getElementById(prefix === 'rec' ? 'salePriceInput' : 'editSalePrice');
+            const salePrice = parseFloat(salePriceInput.value || '0');
+            let valid = true;
+
+            if (!salePrice || salePrice <= 0) {
+                setError('err-' + prefix + '-sale', 'Enter a sale price greater than 0');
+                valid = false;
+            }
+
+            if (buyer === 'REGULAR_CUSTOMER') {
+                const name = document.getElementById(prefix === 'rec' ? 'recCustomerName' : 'editCustomerName').value.trim();
+                const phone = document.getElementById(prefix === 'rec' ? 'recContactNumber' : 'editContactNumber').value.trim();
+                const email = document.getElementById(prefix === 'rec' ? 'recEmail' : 'editEmail').value.trim();
+                if (name.length < 2) {
+                    setError('err-' + prefix + '-name', 'Name must be at least 2 characters');
+                    valid = false;
+                }
+                if (!isValidPhone(phone)) {
+                    setError('err-' + prefix + '-contact', 'Use 07XXXXXXXX or +947XXXXXXXX');
+                    valid = false;
+                }
+                if (!isValidEmail(email)) {
+                    setError('err-' + prefix + '-email', 'Enter a valid email address');
+                    valid = false;
+                }
+            }
+
+            if (buyer === 'EXPORT') {
+                const company = document.getElementById(prefix === 'rec' ? 'recCompanyName' : 'editCompanyName').value.trim();
+                const country = document.getElementById(prefix === 'rec' ? 'recExportCountry' : 'editExportCountry').value.trim();
+                const email = document.getElementById(prefix === 'rec' ? 'recExportEmail' : 'editExportEmail').value.trim();
+                if (!company) {
+                    setError('err-' + prefix + '-company', 'Company name is required');
+                    valid = false;
+                }
+                if (!country) {
+                    setError('err-' + prefix + '-country', 'Export country is required');
+                    valid = false;
+                }
+                if (!isValidEmail(email)) {
+                    setError('err-' + prefix + '-export-email', 'Enter a valid email address');
+                    valid = false;
+                }
+            }
+
+            if (buyer === 'AUCTION') {
+                const house = document.getElementById(prefix === 'rec' ? 'recAuctionHouseName' : 'editAuctionHouseName').value.trim();
+                const location = document.getElementById(prefix === 'rec' ? 'recLocation' : 'editLocation').value.trim();
+                if (!house) {
+                    setError('err-' + prefix + '-auction', 'Auction house is required');
+                    valid = false;
+                }
+                if (!location) {
+                    setError('err-' + prefix + '-location', 'Location is required');
+                    valid = false;
+                }
+            }
+
+            return valid;
+        }
+
+        function openRecordModal() {
+            document.getElementById('recordModal').classList.add('active');
+            clearErrors('rec');
+            document.getElementById('recBuyerType').value = 'REGULAR_CUSTOMER';
+            toggleBuyerFields('rec', 'REGULAR_CUSTOMER');
+        }
+
+        function closeRecordModal() {
+            document.getElementById('recordModal').classList.remove('active');
+        }
+
+        function openEditModal(btn) {
+            const buyer = btn.dataset.buyer || 'REGULAR_CUSTOMER';
+            document.getElementById('editForm').action = '/manager/sales/edit/' + btn.dataset.id;
+            document.getElementById('editSalePrice').value = btn.dataset.price;
+            document.getElementById('editBuyerType').value = buyer;
+
+            document.getElementById('editCustomerName').value = btn.dataset.customer || '';
+            document.getElementById('editContactNumber').value = btn.dataset.contact || '';
+            document.getElementById('editEmail').value = buyer === 'REGULAR_CUSTOMER' ? (btn.dataset.email || '') : '';
+
+            document.getElementById('editCompanyName').value = btn.dataset.company || '';
+            document.getElementById('editExportCountry').value = btn.dataset.country || '';
+            document.getElementById('editExportEmail').value = buyer === 'EXPORT' ? (btn.dataset.email || '') : '';
+
+            document.getElementById('editAuctionHouseName').value = btn.dataset.auction || '';
+            document.getElementById('editLocation').value = btn.dataset.location || '';
+            document.getElementById('editLotNumber').value = btn.dataset.lot || '';
+
+            document.getElementById('editSaleStatus').value = btn.dataset.status || 'FINALIZED';
+            toggleBuyerFields('edit', buyer);
+            clearErrors('edit');
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        let totalInvestment = 0;
+
+        async function loadVehicleData(vehicleId) {
+            if (!vehicleId) return;
+            const res = await fetch('/manager/sales/api/vehicle/' + vehicleId);
+            const data = await res.json();
+            if (!data.totalInvestment && data.totalInvestment !== 0) return;
+
+            totalInvestment = data.totalInvestment;
+            document.getElementById('purchasePriceDisplay').textContent = data.purchasePrice.toFixed(2);
+            document.getElementById('repairCostDisplay').textContent = data.repairCost.toFixed(2);
+            document.getElementById('totalInvestmentDisplay').textContent = data.totalInvestment.toFixed(2);
+            document.getElementById('investmentBox').style.display = 'block';
+            calcProfit();
+        }
+
+        function calcProfit() {
+            const salePriceVal = parseFloat(document.getElementById('salePriceInput').value) || 0;
+            const indicator = document.getElementById('profitIndicator');
+            if (salePriceVal === 0) {
+                indicator.style.display = 'none';
+                return;
+            }
+
+            const profit = salePriceVal - totalInvestment;
+            indicator.style.display = 'block';
+            if (profit >= 0) {
+                indicator.className = 'profit-indicator green';
+                indicator.innerHTML = '<i class="fas fa-arrow-up"></i> Projected Profit: $' + profit.toFixed(2);
+            } else {
+                indicator.className = 'profit-indicator red';
+                indicator.innerHTML = '<i class="fas fa-arrow-down"></i> Projected Loss: $' + Math.abs(profit).toFixed(2);
+            }
+        }
+
+        document.getElementById('recordForm').addEventListener('submit', function (event) {
+            if (!validateSale('rec')) {
+                event.preventDefault();
+            }
+        });
+
+        document.getElementById('editForm').addEventListener('submit', function (event) {
+            if (!validateSale('edit')) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+
+</html>

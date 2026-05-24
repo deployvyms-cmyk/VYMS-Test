@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard - VYMS</title>
+    <link rel="stylesheet" th:href="@{/css/manager.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link active"><i class="fas fa-th-large"></i>
+                    Dashboard</a></li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link"><i class="fas fa-car"></i> Vehicle
+                    Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i>
+                    Repair &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link"><i class="fas fa-shopping-cart"></i>
+                    Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link"><i class="fas fa-file-alt"></i>
+                    Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link"><i class="fas fa-user"></i>
+                    Profile</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main manager dashboard content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Dashboard</h1>
+                <p th:text="${currentUser != null ? 'Welcome back, ' + currentUser.username : 'Welcome back, Manager User'}">Welcome back, Manager User</p>
+            </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="metrics-grid metrics-grid-4">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Vehicles</h3>
+                    <div class="metric-value" th:text="${totalVehicles}">0</div>
+                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-car"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Sales</h3>
+                    <div class="metric-value" th:text="${totalSales}">0</div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Revenue</h3>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">$0</div>
+                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Total Profit</h3>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalProfit, 1, 0)}">$0</div>
+                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+        </div>
+
+        <!-- Charts and tables -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">Monthly Sales Trend</div>
+                <div class="chart-container"><canvas id="salesChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Revenue Trend</div>
+                <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+            </div>
+        </div>
+
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        new Chart(document.getElementById('salesChart'), {
+            type: 'line',
+            data: { labels: months, datasets: [{ data: [45, 52, 49, 61, 57, 59], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: .4, pointRadius: 4 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+        });
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: { labels: months, datasets: [{ data: [130000, 158000, 145000, 178000, 172000, 177000], borderColor: '#10b981', backgroundColor: 'transparent', tension: .4, pointRadius: 4 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+        });
+    </script>
+</body>
+
+</html>
