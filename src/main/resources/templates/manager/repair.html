@@ -101,7 +101,7 @@
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Total Cost</h3>
-                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalRepairCost, 1, 2)}">$0</div>
+                    <div class="metric-value" th:text="${'¥' + #numbers.formatDecimal(totalRepairCost, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-red"><i class="fas fa-dollar-sign"></i></div>
             </div>
@@ -138,7 +138,7 @@
                             <span th:if="${r.repairType == 'EXTERNAL'}" class="badge badge-warning" style="background:#fef3c7;color:#f59e0b;">External</span>
                             <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}" th:text="${r.repairType}">--</span>
                         </td>
-                        <td class="font-bold" th:text="${r.cost != null ? '$' + #numbers.formatDecimal(r.cost, 1, 2) : '$0.00'}">$0.00</td>
+                        <td class="font-bold" th:text="${r.cost != null ? '¥' + #numbers.formatDecimal(r.cost, 1, 0) : '¥0'}">¥0</td>
                         <td th:text="${r.repairDate}">--</td>
                         <td>
                             <span th:if="${r.status == 'INSPECTED'}" class="badge badge-inspected">Inspected</span>
@@ -191,8 +191,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group" style="margin-bottom:0">
-                        <label class="form-label">Cost ($)</label>
-                        <input type="number" name="cost" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                        <label class="form-label">Cost (¥)</label>
+                        <input type="number" name="cost" class="form-control" step="1" min="0" placeholder="0" required>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Repair Type</label>
@@ -227,8 +227,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group" style="margin-bottom:0">
-                        <label class="form-label">Cost ($)</label>
-                        <input type="number" name="cost" id="edit-cost" class="form-control" step="0.01" min="0" required>
+                        <label class="form-label">Cost (¥)</label>
+                        <input type="number" name="cost" id="edit-cost" class="form-control" step="1" min="0" required>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Repair Type</label>

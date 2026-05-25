@@ -241,21 +241,21 @@
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Total Revenue</h3>
-                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}">$0</div>
+                    <div class="metric-value" th:text="${'¥' + #numbers.formatDecimal(totalRevenue, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-blue"><i class="fas fa-dollar-sign"></i></div>
             </div>
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Total Expenses</h3>
-                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(totalExpenses, 1, 2)}">$0</div>
+                    <div class="metric-value" th:text="${'¥' + #numbers.formatDecimal(totalExpenses, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-red"><i class="fas fa-exclamation-circle"></i></div>
             </div>
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Total Profit</h3>
-                    <div class="metric-value text-green" th:text="${'$' + #numbers.formatDecimal(totalProfit, 1, 2)}">$0
+                    <div class="metric-value text-green" th:text="${'¥' + #numbers.formatDecimal(totalProfit, 1, 0)}">¥0
                     </div>
                 </div>
                 <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
@@ -263,7 +263,7 @@
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Avg Profit / Sale</h3>
-                    <div class="metric-value" th:text="${'$' + #numbers.formatDecimal(avgProfitPerSale, 1, 2)}">$0</div>
+                    <div class="metric-value" th:text="${'¥' + #numbers.formatDecimal(avgProfitPerSale, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-purple"><i class="fas fa-percentage"></i></div>
             </div>
@@ -310,12 +310,12 @@
                                 --</span>
                         </td>
                         <td th:text="${row.saleDate}">--</td>
-                        <td th:text="${'$' + row.purchase}">$0</td>
-                        <td th:text="${'$' + row.repair}">$0</td>
-                        <td th:text="${'$' + row.salePrice}">$0</td>
+                        <td th:text="${'¥' + #numbers.formatDecimal(row.purchase, 1, 0)}">¥0</td>
+                        <td th:text="${'¥' + #numbers.formatDecimal(row.repair, 1, 0)}">¥0</td>
+                        <td th:text="${'¥' + #numbers.formatDecimal(row.salePrice, 1, 0)}">¥0</td>
                         <td class="font-semibold"
                             th:classappend="${row.profit != null and row.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
-                            th:text="${'$' + row.profit}">$0</td>
+                            th:text="${'¥' + #numbers.formatDecimal(row.profit, 1, 0)}">¥0</td>
                         <td th:classappend="${row.margin != null and row.margin.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-green' : 'text-red'"
                             th:text="${row.margin + '%'}">0%</td>
                     </tr>
@@ -352,7 +352,7 @@
             </div>
             <div class="inv-stat">
                 <h4>Total Repair Cost</h4>
-                <div class="val red" th:text="${'$' + #numbers.formatDecimal(totalRepairCost, 1, 2)}">$0</div>
+                <div class="val red" th:text="${'¥' + #numbers.formatDecimal(totalRepairCost, 1, 0)}">¥0</div>
             </div>
         </div>
 
@@ -401,7 +401,7 @@
                             <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
                                 th:text="${r.repairType}">--</span>
                         </td>
-                        <td style="font-weight:600;" th:text="${r.cost != null ? '$' + r.cost : '$0'}">$0</td>
+                        <td style="font-weight:600;" th:text="${r.cost != null ? '¥' + #numbers.formatDecimal(r.cost, 1, 0) : '¥0'}">¥0</td>
                         <td th:text="${r.repairDate}">--</td>
                         <td>
                             <span class="repair-badge badge-inspected-r"
@@ -465,7 +465,7 @@
                                 <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
                                     th:text="${r.repairType}">--</span>
                             </td>
-                            <td class="font-bold" th:text="${r.cost != null ? '$' + r.cost : '$0'}">$0</td>
+                            <td class="font-bold" th:text="${r.cost != null ? '¥' + #numbers.formatDecimal(r.cost, 1, 0) : '¥0'}">¥0</td>
                             <td th:text="${r.repairDate}">Date</td>
                             <td>
                                 <span th:if="${r.status == 'INSPECTED'}" class="badge badge-inspected">Inspected</span>
@@ -530,14 +530,14 @@
                                     th:text="${s.buyerType != null ? s.buyerType.name() : '--'}">Type
                                 </span>
                             </td>
-                            <td class="font-bold" th:text="${s.salePrice != null ? '$' + s.salePrice : '--'}">$0</td>
+                            <td class="font-bold" th:text="${s.salePrice != null ? '¥' + #numbers.formatDecimal(s.salePrice, 1, 0) : '--'}">¥0</td>
                             <td>
                                 <span
                                     th:if="${s.profit != null and s.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0}"
-                                    class="text-green" th:text="${'$' + s.profit}">$0</span>
+                                    class="text-green" th:text="${'¥' + #numbers.formatDecimal(s.profit, 1, 0)}">¥0</span>
                                 <span
                                     th:if="${s.profit != null and s.profit.compareTo(T(java.math.BigDecimal).ZERO) < 0}"
-                                    class="text-red" th:text="${'$' + s.profit}">$0</span>
+                                    class="text-red" th:text="${'¥' + #numbers.formatDecimal(s.profit, 1, 0)}">¥0</span>
                             </td>
                             <td th:text="${s.saleDate}">Date</td>
                             <td>
@@ -584,8 +584,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group-modal">
-                        <label class="form-label">Cost ($)</label>
-                        <input type="number" name="cost" id="repair-cost" class="form-control" step="0.01" min="0"
+                        <label class="form-label">Cost (¥)</label>
+                        <input type="number" name="cost" id="repair-cost" class="form-control" step="1" min="0"
                             required>
                     </div>
                     <div class="form-group-modal">
@@ -624,8 +624,8 @@
             <form id="saleForm" method="post">
                 <div class="form-row">
                     <div class="form-group-modal">
-                        <label class="form-label">Sale Price ($)</label>
-                        <input type="number" name="salePrice" id="sale-price" class="form-control" step="0.01" min="0"
+                        <label class="form-label">Sale Price (¥)</label>
+                        <input type="number" name="salePrice" id="sale-price" class="form-control" step="1" min="0"
                             required>
                     </div>
                     <div class="form-group-modal">
@@ -686,7 +686,7 @@
                 plugins: { legend: { position: 'bottom' } },
                 scales: {
                     x: { grid: { display: false } },
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '$' + v.toLocaleString() } }
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '¥' + v.toLocaleString() } }
                 }
             }
         });
@@ -719,7 +719,7 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false } },
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '$' + v.toLocaleString() } }
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => '¥' + v.toLocaleString() } }
                 }
             }
         });

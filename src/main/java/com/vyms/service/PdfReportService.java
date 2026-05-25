@@ -59,7 +59,7 @@ public class PdfReportService {
             doc.add(sectionTitle("Business Summary"));
             PdfPTable summary = newTable(new float[]{25,25,25,25});
             addTh(summary, "Total Revenue", "Total Expenses", "Total Profit", "Total Repair Cost");
-            addTdRow(summary, Color.WHITE, "$" + fmt(totalRevenue), "$" + fmt(totalExpenses), "$" + fmt(totalProfit), "$" + fmt(repairTotal));
+            addTdRow(summary, Color.WHITE, "¥" + fmt(totalRevenue), "¥" + fmt(totalExpenses), "¥" + fmt(totalProfit), "¥" + fmt(repairTotal));
             doc.add(summary);
             doc.add(Chunk.NEWLINE);
 
@@ -85,9 +85,9 @@ public class PdfReportService {
                 String cust  = s.getCustomerName() != null ? s.getCustomerName() : (s.getCompanyName() != null ? s.getCompanyName() : "—");
                 addTdRow(salesTable, bg, veh, buyer, cust,
                         s.getSaleDate() != null ? s.getSaleDate().toString() : "—",
-                        "$" + fmt(s.getTotalCost()),
-                        "$" + fmt(s.getSalePrice()),
-                        "$" + fmt(s.getProfit()));
+                        "¥" + fmt(s.getTotalCost()),
+                        "¥" + fmt(s.getSalePrice()),
+                        "¥" + fmt(s.getProfit()));
                 alt = !alt;
             }
             if (sales.isEmpty()) addEmptyRow(salesTable, 7);
@@ -106,7 +106,7 @@ public class PdfReportService {
                         safe(r.getDescription()),
                         safe(r.getRepairType()),
                         r.getRepairDate() != null ? r.getRepairDate().toString() : "—",
-                        "$" + fmt(r.getCost()));
+                        "¥" + fmt(r.getCost()));
                 alt = !alt;
             }
             if (repairs.isEmpty()) addEmptyRow(repTable, 5);
@@ -136,8 +136,8 @@ public class PdfReportService {
             BigDecimal internal = repairs.stream().filter(r -> "INTERNAL".equalsIgnoreCase(r.getRepairType())).map(r -> r.getCost() != null ? r.getCost() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
             BigDecimal external = repairs.stream().filter(r -> "EXTERNAL".equalsIgnoreCase(r.getRepairType())).map(r -> r.getCost() != null ? r.getCost() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            addSummaryPair(doc, "Total Repair Cost", "$" + fmt(total), "Total Records", String.valueOf(repairs.size()));
-            addSummaryPair(doc, "Internal Cost",     "$" + fmt(internal), "External Cost", "$" + fmt(external));
+            addSummaryPair(doc, "Total Repair Cost", "¥" + fmt(total), "Total Records", String.valueOf(repairs.size()));
+            addSummaryPair(doc, "Internal Cost",     "¥" + fmt(internal), "External Cost", "¥" + fmt(external));
 
             PdfPTable table = newTable(new float[]{22, 35, 15, 14, 14});
             addTh(table, "Vehicle", "Description", "Type", "Date", "Cost");
@@ -148,7 +148,7 @@ public class PdfReportService {
                 String veh = r.getVehicle() != null ? r.getVehicle().getVehicleModel() : "—";
                 addTdRow(table, bg, veh, safe(r.getDescription()), safe(r.getRepairType()),
                         r.getRepairDate() != null ? r.getRepairDate().toString() : "—",
-                        "$" + fmt(r.getCost()));
+                        "¥" + fmt(r.getCost()));
                 alt = !alt;
             }
             if (repairs.isEmpty()) addEmptyRow(table, 5);
@@ -176,9 +176,9 @@ public class PdfReportService {
             BigDecimal totalRevenue = sales.stream().map(s -> s.getSalePrice() != null ? s.getSalePrice() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
             BigDecimal totalProfit  = sales.stream().map(Sale::getProfit).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            addSummaryPair(doc, "Total Sales", String.valueOf(sales.size()), "Total Revenue", "$" + fmt(totalRevenue));
-            addSummaryPair(doc, "Total Profit", "$" + fmt(totalProfit), "Avg Sale Price",
-                    sales.isEmpty() ? "—" : "$" + fmt(totalRevenue.divide(BigDecimal.valueOf(sales.size()), 2, java.math.RoundingMode.HALF_UP)));
+            addSummaryPair(doc, "Total Sales", String.valueOf(sales.size()), "Total Revenue", "¥" + fmt(totalRevenue));
+            addSummaryPair(doc, "Total Profit", "¥" + fmt(totalProfit), "Avg Sale Price",
+                    sales.isEmpty() ? "—" : "¥" + fmt(totalRevenue.divide(BigDecimal.valueOf(sales.size()), 0, java.math.RoundingMode.HALF_UP)));
 
             PdfPTable table = newTable(new float[]{18, 15, 18, 12, 14, 14, 10});
             addTh(table, "Vehicle", "Buyer Type", "Customer / Company", "Date", "Cost", "Sale Price", "Profit");
@@ -191,9 +191,9 @@ public class PdfReportService {
                 String cust  = firstNonNull(s.getCustomerName(), s.getCompanyName(), s.getAuctionHouseName(), "—");
                 addTdRow(table, bg, veh, buyer, cust,
                         s.getSaleDate() != null ? s.getSaleDate().toString() : "—",
-                        "$" + fmt(s.getTotalCost()),
-                        "$" + fmt(s.getSalePrice()),
-                        "$" + fmt(s.getProfit()));
+                        "¥" + fmt(s.getTotalCost()),
+                        "¥" + fmt(s.getSalePrice()),
+                        "¥" + fmt(s.getProfit()));
                 alt = !alt;
             }
             if (sales.isEmpty()) addEmptyRow(table, 7);
@@ -243,8 +243,8 @@ public class PdfReportService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             addSummaryPair(doc, "Total Vehicles",   String.valueOf(total),   "In Stock (Unsold)", String.valueOf(unsold));
-            addSummaryPair(doc, "Sold Vehicles",    String.valueOf(sold),    "Total Investment (Unsold Stock)", "$" + fmt(totalInvestment));
-            addSummaryPair(doc, "Potential Revenue (Unsold)", "$" + fmt(potentialRevenue), "Revenue Realised (Sold)", "$" + fmt(soldRevenue));
+            addSummaryPair(doc, "Sold Vehicles",    String.valueOf(sold),    "Total Investment (Unsold Stock)", "¥" + fmt(totalInvestment));
+            addSummaryPair(doc, "Potential Revenue (Unsold)", "¥" + fmt(potentialRevenue), "Revenue Realised (Sold)", "¥" + fmt(soldRevenue));
 
             // ── Vehicle Table ──
             doc.add(sectionTitle("Vehicle Stock List (" + total + " vehicles)"));
@@ -259,9 +259,9 @@ public class PdfReportService {
                 PdfPCell modelCell    = tdCell(safe(v.getVehicleModel()), bg);
                 PdfPCell chassisCell  = tdCell(safe(v.getChassisNumber()), bg);
                 PdfPCell plateCell    = tdCell(safe(v.getLicensePlate()), bg);
-                PdfPCell purchaseCell = tdCell("$" + fmt(v.getPurchasePrice()), bg);
-                PdfPCell repairCell   = tdCell("$" + fmt(v.getRepairCost()), bg);
-                PdfPCell salePriceCell = tdCell(v.getSalePrice() != null ? "$" + fmt(v.getSalePrice()) : "--", bg);
+                PdfPCell purchaseCell = tdCell("¥" + fmt(v.getPurchasePrice()), bg);
+                PdfPCell repairCell   = tdCell("¥" + fmt(v.getRepairCost()), bg);
+                PdfPCell salePriceCell = tdCell(v.getSalePrice() != null ? "¥" + fmt(v.getSalePrice()) : "--", bg);
                 PdfPCell statusCell   = coloredTdCell(status, bg, sc);
                 table.addCell(modelCell);
                 table.addCell(chassisCell);
@@ -406,7 +406,7 @@ public class PdfReportService {
     }
 
     private String fmt(BigDecimal v) {
-        return v != null ? String.format("%,.2f", v) : "0.00";
+        return v != null ? String.format("%,.0f", v) : "0";
     }
 
     private String safe(String v) { return v != null ? v : "—"; }

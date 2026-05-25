@@ -156,7 +156,7 @@
                             <span th:text="${'Chassis: ' + (sale.vehicle != null ? sale.vehicle.chassisNumber : '-')}">Chassis</span><br>
                             <span th:text="${'Plate: ' + (sale.vehicle != null ? sale.vehicle.licensePlate : '-')}">Plate</span>
                         </td>
-                        <td style="text-align:right; font-weight:600;" th:text="${'$' + sale.salePrice}">$0</td>
+                        <td style="text-align:right; font-weight:600;" th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</td>
                     </tr>
                 </tbody>
             </table>
@@ -164,22 +164,22 @@
             <div class="invoice-totals">
                 <div class="invoice-total-row">
                     <span style="color:var(--text-muted);">Purchase Price</span>
-                    <span th:text="${sale.vehicle != null ? '$' + (sale.vehicle.purchasePrice != null ? sale.vehicle.purchasePrice : 0) : '-'}">$0</span>
+                    <span th:text="${sale.vehicle != null ? '¥' + #numbers.formatDecimal((sale.vehicle.purchasePrice != null ? sale.vehicle.purchasePrice : 0), 1, 0) : '-'}">¥0</span>
                 </div>
                 <div class="invoice-total-row">
                     <span style="color:var(--text-muted);">Repair Costs</span>
-                    <span th:text="${sale.vehicle != null ? '$' + (sale.vehicle.repairCost != null ? sale.vehicle.repairCost : 0) : '-'}">$0</span>
+                    <span th:text="${sale.vehicle != null ? '¥' + #numbers.formatDecimal((sale.vehicle.repairCost != null ? sale.vehicle.repairCost : 0), 1, 0) : '-'}">¥0</span>
                 </div>
                 <div class="invoice-total-row final">
                     <span>Sale Price</span>
-                    <span th:text="${'$' + sale.salePrice}">$0</span>
+                    <span th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</span>
                 </div>
             </div>
 
             <!-- Profit/Loss -->
             <div class="invoice-profit" th:if="${sale.profit != null}"
                 th:classappend="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'text-profit' : 'text-loss'}">
-                <span th:text="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'Net Profit: $' + sale.profit : 'Net Loss: $' + sale.profit.abs()}">
+                <span th:text="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'Net Profit: ¥' + #numbers.formatDecimal(sale.profit, 1, 0) : 'Net Loss: ¥' + #numbers.formatDecimal(sale.profit.abs(), 1, 0)}">
                     Profit/Loss
                 </span>
             </div>

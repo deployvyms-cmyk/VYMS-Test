@@ -178,7 +178,7 @@
             <div class="metric-card">
                 <div class="metric-info">
                     <h3>Total Revenue</h3>
-                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(totalRevenue, 1, 2)}">$0.00</div>
+                    <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-purple"><i class="fas fa-dollar-sign"></i></div>
             </div>
@@ -253,12 +253,12 @@
                             </span>
                         </td>
                         <td>
-                            <span class="font-bold" th:text="${'$' + #numbers.formatDecimal(sale.salePrice, 1, 2)}">$0.00</span>
+                            <span class="font-bold" th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</span>
                         </td>
                         <td>
                             <span th:if="${sale.profit != null}"
                                 th:classappend="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-profit' : 'text-loss'"
-                                th:text="${(sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0) ? '+$' + #numbers.formatDecimal(sale.profit, 1, 2) : '-$' + #numbers.formatDecimal(sale.profit.abs(), 1, 2)}">$0.00</span>
+                                th:text="${(sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0) ? '+¥' + #numbers.formatDecimal(sale.profit, 1, 0) : '-¥' + #numbers.formatDecimal(sale.profit.abs(), 1, 0)}">¥0</span>
                         </td>
                         <td th:text="${sale.saleDate}">Date</td>
                         <td>
@@ -329,9 +329,9 @@
 
                 <!-- Investment summary box -->
                 <div class="investment-box" id="investmentBox">
-                    Purchase Price: $<span id="purchasePriceDisplay">0.00</span><br>
-                    Repair Costs: $<span id="repairCostDisplay">0.00</span><br>
-                    <strong>Total Investment: $<span id="totalInvestmentDisplay">0.00</span></strong>
+                    Purchase Price: ¥<span id="purchasePriceDisplay">0</span><br>
+                    Repair Costs: ¥<span id="repairCostDisplay">0</span><br>
+                    <strong>Total Investment: ¥<span id="totalInvestmentDisplay">0</span></strong>
                 </div>
 
                 <div class="form-row">
@@ -346,7 +346,7 @@
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Sale Price</label>
                         <input type="number" name="salePrice" id="salePriceInput" class="form-control"
-                            placeholder="0.00" step="0.01" min="0" required oninput="calcProfit()">
+                            placeholder="0" step="1" min="0" required oninput="calcProfit()">
                         <span class="field-error" id="err-rec-sale"></span>
                     </div>
                 </div>
@@ -446,8 +446,8 @@
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Sale Price</label>
-                        <input type="number" name="salePrice" id="editSalePrice" class="form-control" placeholder="0.00"
-                            step="0.01" min="0" required>
+                        <input type="number" name="salePrice" id="editSalePrice" class="form-control" placeholder="0"
+                            step="1" min="0" required>
                         <span class="field-error" id="err-edit-sale"></span>
                     </div>
                 </div>
@@ -699,9 +699,9 @@
             if (!data.totalInvestment && data.totalInvestment !== 0) return;
 
             totalInvestment = data.totalInvestment;
-            document.getElementById('purchasePriceDisplay').textContent = data.purchasePrice.toFixed(2);
-            document.getElementById('repairCostDisplay').textContent = data.repairCost.toFixed(2);
-            document.getElementById('totalInvestmentDisplay').textContent = data.totalInvestment.toFixed(2);
+            document.getElementById('purchasePriceDisplay').textContent = data.purchasePrice.toFixed(0);
+            document.getElementById('repairCostDisplay').textContent = data.repairCost.toFixed(0);
+            document.getElementById('totalInvestmentDisplay').textContent = data.totalInvestment.toFixed(0);
             document.getElementById('investmentBox').style.display = 'block';
             calcProfit();
         }
@@ -718,10 +718,10 @@
             indicator.style.display = 'block';
             if (profit >= 0) {
                 indicator.className = 'profit-indicator green';
-                indicator.innerHTML = '<i class="fas fa-arrow-up"></i> Projected Profit: $' + profit.toFixed(2);
+                indicator.innerHTML = '<i class="fas fa-arrow-up"></i> Projected Profit: ¥' + profit.toFixed(0);
             } else {
                 indicator.className = 'profit-indicator red';
-                indicator.innerHTML = '<i class="fas fa-arrow-down"></i> Projected Loss: $' + Math.abs(profit).toFixed(2);
+                indicator.innerHTML = '<i class="fas fa-arrow-down"></i> Projected Loss: ¥' + Math.abs(profit).toFixed(0);
             }
         }
 

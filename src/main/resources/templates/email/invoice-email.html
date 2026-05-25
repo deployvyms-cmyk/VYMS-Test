@@ -36,7 +36,7 @@
                     </tr>
                     <tr>
                         <td style="padding: 8px 0; font-weight: bold;">Sale Price</td>
-                        <td style="padding: 8px 0; text-align: right; font-weight: bold;" th:text="${'$' + sale.salePrice}">$0</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;" th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</td>
                     </tr>
                 </table>
 
@@ -49,4 +49,3 @@
 </body>
 
 </html>
-
