@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>User Profile - VYMS</title>
+    <link rel="stylesheet" th:if="${userProfile != null && userProfile.role != null && userProfile.role.name() == 'ADMIN'}" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" th:if="${userProfile != null && userProfile.role != null && userProfile.role.name() == 'MANAGER'}" th:href="@{/css/manager.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,84 +20,162 @@
         <div class="toast toast-error" th:if="${errorMsg}" th:text="${errorMsg}">Error</div>
     </div>
 
-    <!-- Main profile content -->
-    <main class="profile-page">
-        <!-- Header with title and back link -->
-        <header class="profile-header">
-            <div class="profile-title">
-                <h1>User Profile</h1>
-                <p class="subtitle" th:text="${userProfile != null ? 'Signed in as ' + userProfile.username : ''}">Signed in
-                    as</p>
-            </div>
-            <div class="profile-actions">
-                <a class="btn btn-outline" th:href="@{${dashboardPath}}"><i class="fas fa-arrow-left"></i> Back to
-                    Dashboard</a>
-            </div>
-        </header>
+    <!-- Sidebar navigation (ADMIN) -->
+    <aside class="sidebar" th:if="${userProfile != null && userProfile.role != null && userProfile.role.name() == 'ADMIN'}">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
 
-        <!-- Profile hero card -->
-        <section class="profile-hero">
-            <div class="profile-avatar" aria-hidden="true">
-                <i class="fas fa-user-circle"></i>
+        <div class="sidebar-user">
+            <div class="user-avatar">AU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Admin User'}">Admin User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Admin'}">Admin</p>
             </div>
-            <div class="profile-meta">
-                <h2 th:text="${userProfile.username}">User Name</h2>
-                <p class="profile-role" th:text="${userProfile.role != null ? userProfile.role.name() : ''}">ROLE</p>
-                <p class="profile-email" th:text="${userProfile.email}">user@email.com</p>
-            </div>
-        </section>
+        </div>
 
-        <!-- Editable account details form -->
-        <section class="profile-card">
-            <div class="card-header">
-                <div>
-                    <h2>Account Details</h2>
-                    <p class="card-hint">Update your personal details and security settings.</p>
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a th:href="@{/admin}" class="nav-link">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/users}" class="nav-link">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/admin/reports}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/profile}" class="nav-link active">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Sidebar navigation (MANAGER) -->
+    <aside class="sidebar" th:if="${userProfile != null && userProfile.role != null && userProfile.role.name() == 'MANAGER'}">
+        <div class="sidebar-header">
+            <h2>Vehicle Yard</h2>
+            <p>Management System</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar">MU</div>
+            <div class="user-info">
+                <h3 th:text="${currentUser != null ? currentUser.username : 'Manager User'}">Manager User</h3>
+                <p th:text="${currentUser != null && currentUser.role != null ? currentUser.role : 'Manager'}">Manager</p>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item"><a th:href="@{/manager}" class="nav-link"><i class="fas fa-th-large"></i>
+                    Dashboard</a></li>
+            <li class="nav-item"><a th:href="@{/manager/inventory}" class="nav-link"><i class="fas fa-car"></i> Vehicle
+                    Inventory</a></li>
+            <li class="nav-item"><a th:href="@{/manager/repair}" class="nav-link"><i class="fas fa-tools"></i>
+                    Repair &amp; Maintenance</a></li>
+            <li class="nav-item"><a th:href="@{/manager/sales}" class="nav-link"><i class="fas fa-shopping-cart"></i>
+                    Sales Management</a></li>
+            <li class="nav-item"><a th:href="@{/manager/reports}" class="nav-link"><i class="fas fa-file-alt"></i>
+                    Reports</a></li>
+            <li class="nav-item"><a th:href="@{/profile}" class="nav-link active"><i class="fas fa-user"></i>
+                    Profile</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main profile content wrapped in main-content to align with sidebar layout -->
+    <main class="main-content">
+        <div class="profile-page">
+            <!-- Header with title and back link -->
+            <header class="profile-header">
+                <div class="profile-title">
+                    <h1>User Profile</h1>
+                    <p class="subtitle" th:text="${userProfile != null ? 'Signed in as ' + userProfile.username : ''}">Signed in
+                        as</p>
                 </div>
-            </div>
-            <form th:action="@{/profile}" method="post">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="username">Full Name</label>
-                        <input id="username" name="username" type="text" th:value="${userProfile.username}" required
-                            minlength="2" maxlength="100">
-                    </div>
+                <div class="profile-actions">
+                    <a class="btn btn-outline" th:href="@{${dashboardPath}}"><i class="fas fa-arrow-left"></i> Back to
+                        Dashboard</a>
+                </div>
+            </header>
 
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input id="email" name="email" type="email" th:value="${userProfile.email}" required>
+            <!-- Profile hero card -->
+            <section class="profile-hero">
+                <div class="profile-avatar" aria-hidden="true">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="profile-meta">
+                    <h2 th:text="${userProfile.username}">User Name</h2>
+                    <p class="profile-role" th:text="${userProfile.role != null ? userProfile.role.name() : ''}">ROLE</p>
+                    <p class="profile-email" th:text="${userProfile.email}">user@email.com</p>
+                </div>
+            </section>
+
+            <!-- Editable account details form -->
+            <section class="profile-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Account Details</h2>
+                        <p class="card-hint">Update your personal details and security settings.</p>
                     </div>
                 </div>
+                <form th:action="@{/profile}" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="username">Full Name</label>
+                            <input id="username" name="username" type="text" th:value="${userProfile.username}" required
+                                minlength="2" maxlength="100">
+                        </div>
 
-                <div class="divider"></div>
-
-                <h3 class="section-title">Security</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input id="currentPassword" name="currentPassword" type="password"
-                            placeholder="Required to change password">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input id="email" name="email" type="email" th:value="${userProfile.email}" required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input id="newPassword" name="newPassword" type="password" minlength="8"
-                            placeholder="Leave blank to keep current password">
+                    <div class="divider"></div>
+
+                    <h3 class="section-title">Security</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input id="currentPassword" name="currentPassword" type="password"
+                                placeholder="Required to change password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input id="newPassword" name="newPassword" type="password" minlength="8"
+                                placeholder="Leave blank to keep current password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input id="confirmPassword" name="confirmPassword" type="password" minlength="8"
+                                placeholder="Repeat new password">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
-                        <input id="confirmPassword" name="confirmPassword" type="password" minlength="8"
-                            placeholder="Repeat new password">
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save Changes</button>
                     </div>
-                </div>
-
-                <div class="form-actions">
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save Changes</button>
-                </div>
-            </form>
-        </section>
+                </form>
+            </section>
+        </div>
     </main>
 </body>
-
 </html>

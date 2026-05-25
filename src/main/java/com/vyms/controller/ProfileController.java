@@ -40,6 +40,7 @@ public class ProfileController {
             return "redirect:/login";
         }
         model.addAttribute("userProfile", currentUser);
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("dashboardPath", dashboardPath(currentUser.getRole()));
         return "profile";
     }
