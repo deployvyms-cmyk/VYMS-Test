@@ -220,7 +220,8 @@
                 </div>
                 <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
-            <form id="editForm" method="post">
+            <form id="editForm" th:action="@{/manager/repair/edit/0}" method="post">
+                <input type="hidden" name="repairId" id="edit-repair-id" value="0">
                 <div class="form-group">
                     <label class="form-label">Description</label>
                     <input type="text" name="description" id="edit-desc" class="form-control" required>
@@ -254,19 +255,31 @@
     </div>
 
     <script th:inline="javascript">
+        /*<![CDATA[*/
+        var editBaseUrl = /*[[@{/manager/repair/edit/}]]*/ '/manager/repair/edit/';
+        /*]]>*/
+
         function openLogModal() {
             document.getElementById('logModal').classList.add('active');
         }
         function closeLogModal() {
             document.getElementById('logModal').classList.remove('active');
         }
-        function openEditModal(btn) {
-            const d = btn.dataset;
-            document.getElementById('editForm').action = '/manager/repair/edit/' + d.id;
+        function openEditModal(el) {
+            // Walk up to the button element if user clicked the <i> icon
+            var btn = el;
+            while (btn && btn.tagName !== 'BUTTON') {
+                btn = btn.parentElement;
+            }
+            if (!btn) return;
+            var d = btn.dataset;
+            var repairId = d.id;
+            document.getElementById('editForm').action = editBaseUrl + repairId;
+            document.getElementById('edit-repair-id').value = repairId;
             document.getElementById('edit-desc').value = d.desc || '';
             document.getElementById('edit-cost').value = d.cost || '';
-            document.getElementById('edit-type').value = d.type || '';
-            document.getElementById('edit-status').value = d.status || '';
+            document.getElementById('edit-type').value = d.type || 'INTERNAL';
+            document.getElementById('edit-status').value = d.status || 'PENDING';
             document.getElementById('editModal').classList.add('active');
         }
         function closeEditModal() {
@@ -274,8 +287,8 @@
         }
 
         // Auto-open log modal if vehicleId is specified in URL parameter
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
+        window.addEventListener('DOMContentLoaded', function() {
+            var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('vehicleId')) {
                 openLogModal();
             }
