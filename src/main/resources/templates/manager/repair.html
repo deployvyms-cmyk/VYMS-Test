@@ -153,7 +153,8 @@
                                 <button type="button" class="btn btn-outline btn-sm js-repair-edit" th:data-id="${r.id}" th:data-desc="${r.description}"
                                     th:data-cost="${r.cost}" th:data-type="${r.repairType}" th:data-status="${r.status}"
                                     th:disabled="${r.vehicle != null and r.vehicle.status == 'SOLD'}">
-                                    <i class="fas fa-pencil-alt"></i> Edit
+                                    <i class="fas fa-lock" th:if="${r.vehicle != null and r.vehicle.status == 'SOLD'}"></i>
+                                    <i class="fas fa-pencil-alt" th:if="${r.vehicle == null or r.vehicle.status != 'SOLD'}"></i> Edit
                                 </button>
                             </div>
                         </td>

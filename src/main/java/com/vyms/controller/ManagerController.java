@@ -495,6 +495,10 @@ public class ManagerController {
     @GetMapping("/repair")
     public String repair(Model model, @RequestParam(name = "vehicleId", required = false) Long vehicleId) {
         List<Repair> repairs = repairService.findActive();
+        repairs.sort(Comparator
+                .comparing((Repair r) -> r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus()))
+                .thenComparing(Repair::getRepairDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(Repair::getId, Comparator.nullsLast(Comparator.reverseOrder())));
         List<Vehicle> vehicles = vehicleService.findAll().stream()
                 .filter(v -> !"SOLD".equalsIgnoreCase(v.getStatus()))
                 .collect(Collectors.toList());
