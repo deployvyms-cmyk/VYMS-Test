@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Sales',
                     data: [42, 51, 48, 62, 55, 59],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.12)',
                     borderWidth: 2,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#3b82f6',
+                    pointBorderColor: '#2563eb',
                     pointRadius: 4,
                     fill: false,
                     tension: 0.4
@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Revenue',
                     data: [120000, 150000, 135000, 180000, 165000, 175000],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.12)',
                     borderWidth: 2,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#10b981',
+                    pointBorderColor: '#16a34a',
                     pointRadius: 4,
                     fill: false,
                     tension: 0.4
@@ -98,14 +98,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Revenue',
                         data: [170333],
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#2563eb',
                         barPercentage: 0.4,
                         categoryPercentage: 0.8
                     },
                     {
                         label: 'Profit',
                         data: [68183],
-                        backgroundColor: '#10b981',
+                        backgroundColor: '#16a34a',
                         barPercentage: 0.4,
                         categoryPercentage: 0.8
                     }
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Auction', 'Export', 'Regular Customer'],
                 datasets: [{
                     data: [0, 33.3, 66.7],
-                    backgroundColor: ['#f97316', '#10b981', '#3b82f6'],
+                    backgroundColor: ['#2563eb', '#16a34a', '#f59e0b'],
                     borderWidth: 1
                 }]
             },

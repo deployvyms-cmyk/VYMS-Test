@@ -447,9 +447,18 @@
         const buyerTypeLabels = /*[[${buyerTypeLabels}]]*/[];
         const buyerTypeValues = /*[[${buyerTypeValues}]]*/[];
 
+        const chartColors = {
+            blue: '#2563eb',
+            green: '#16a34a',
+            amber: '#f59e0b',
+            purple: '#8b5cf6'
+        };
+
         // Map buyer type keys to friendly labels
         const btFriendly = buyerTypeLabels.map(l =>
-            l === 'REGULAR_CUSTOMER' ? 'Regular Customer' : (l === 'EXPORT' ? 'Export' : 'Auction'));
+            l === 'REGULAR_CUSTOMER' ? 'Regular Customer'
+            : (l === 'REGULAR_COMPANY' ? 'Regular Company'
+                : (l === 'EXPORT' ? 'Export' : 'Auction')));
 
         // Monthly revenue and profit chart
         new Chart(document.getElementById('profitRevenueChart'), {
@@ -457,8 +466,8 @@
             data: {
                 labels: monthLabels,
                 datasets: [
-                    { label: 'Revenue', data: monthlyRevenue, backgroundColor: '#3b82f6', borderRadius: 4 },
-                    { label: 'Profit', data: monthlyProfit, backgroundColor: '#10b981', borderRadius: 4 }
+                    { label: 'Revenue', data: monthlyRevenue, backgroundColor: chartColors.blue, borderRadius: 4 },
+                    { label: 'Profit', data: monthlyProfit, backgroundColor: chartColors.green, borderRadius: 4 }
                 ]
             },
             options: {
@@ -481,7 +490,7 @@
                 labels: btFriendly,
                 datasets: [{
                     data: buyerTypeValues,
-                    backgroundColor: ['#e3c922', '#10b981', '#3b82f6'],
+                    backgroundColor: [chartColors.blue, chartColors.green, chartColors.amber, chartColors.purple],
                     borderWidth: 2, borderColor: '#fff'
                 }]
             },
@@ -502,7 +511,7 @@
                 datasets: [{
                     label: 'Repair Cost',
                     data: monthlyRepairCost,
-                    backgroundColor: '#09e481', borderRadius: 4
+                    backgroundColor: chartColors.amber, borderRadius: 4
                 }]
             },
             options: {
