@@ -292,6 +292,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group" style="margin-top: 16px;">
+                        <button type="button" class="btn btn-outline" id="editNoteToggle" onclick="toggleEditNote()"
+                            th:if="${vehicle == null or vehicle.status != 'SOLD'}">
+                            <i class="fas fa-note-sticky"></i> <span id="editNoteToggleText" th:text="${vehicle.importantNote != null and !vehicle.importantNote.isEmpty()} ? 'Hide Important Note' : 'Add Important Note'">Add Important Note</span>
+                        </button>
+                        <div id="editNoteWrap" th:style="${vehicle.importantNote != null and !vehicle.importantNote.isEmpty()} ? 'margin-top:12px;' : 'display:none; margin-top:12px;'">
+                            <label class="form-label">Important Note (Optional)</label>
+                            <textarea name="importantNote" id="editImportantNote" class="form-control" rows="3"
+                                th:disabled="${vehicle != null and vehicle.status == 'SOLD'}"
+                                placeholder="E.g. Accident history, special modifications, pending paperwork, import details..."
+                                th:text="${vehicle.importantNote}"></textarea>
+                        </div>
+                    </div>
+
                     <div style="margin-top: 28px; display: flex; gap: 12px;">
                         <button type="submit" class="btn btn-primary" th:if="${vehicle == null or vehicle.status != 'SOLD'}">
                             <i class="fas fa-save"></i> Update Vehicle
@@ -532,6 +546,15 @@
                 if (placeholder) placeholder.style.display = 'none';
             };
             reader.readAsDataURL(file);
+        }
+
+        function toggleEditNote() {
+            const wrap = document.getElementById('editNoteWrap');
+            const text = document.getElementById('editNoteToggleText');
+            const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+            wrap.style.display = isHidden ? 'block' : 'none';
+            text.textContent = isHidden ? 'Hide Important Note' : 'Add Important Note';
+            if (isHidden) document.getElementById('editImportantNote').focus();
         }
     </script>
     <script src="/js/language-switcher.js"></script>

@@ -5,37 +5,299 @@
     <meta charset="UTF-8">
     <title>Invoice - VYMS</title>
     <link rel="stylesheet" th:href="@{/css/manager.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: var(--slate-800);
+        }
+
         @media print {
             .no-print { display: none !important; }
-            body { margin: 0; }
-            .main-content { margin-left: 0; }
+            body { background: #fff !important; padding: 0 !important; }
+            .main-content { margin-left: 0 !important; padding: 0 !important; }
+            .invoice-page { border: none !important; box-shadow: none !important; padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
         }
-        .invoice-page { background:#fff; border-radius:12px; border:1px solid var(--border,#e2e8f0); padding:40px; max-width:800px; box-shadow:0 4px 20px rgba(0,0,0,0.04); }
-        .invoice-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:24px; border-bottom:2px solid #e2e8f0; }
-        .invoice-brand h2 { font-size:22px; font-weight:800; color:#1e3a8a; }
-        .invoice-brand p { font-size:13px; color:var(--text-muted,#64748b); }
-        .invoice-meta { text-align:right; }
-        .invoice-meta h3 { font-size:24px; font-weight:800; color:#1e3a8a; letter-spacing:2px; }
-        .invoice-meta p { font-size:13px; color:var(--text-muted,#64748b); margin-top:4px; }
-        .invoice-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px; }
-        .invoice-section h4 { font-size:12px; text-transform:uppercase; color:var(--text-muted,#64748b); letter-spacing:1px; margin-bottom:8px; }
-        .invoice-table { width:100%; border-collapse:collapse; margin-bottom:24px; }
-        .invoice-table th { background:#f8fafc; padding:12px 16px; text-align:left; font-size:12px; text-transform:uppercase; color:var(--text-muted,#64748b); border-bottom:2px solid #e2e8f0; }
-        .invoice-table td { padding:14px 16px; border-bottom:1px solid #f1f5f9; }
-        .invoice-totals { display:flex; flex-direction:column; align-items:flex-end; gap:8px; margin-bottom:24px; }
-        .invoice-total-row { display:flex; justify-content:space-between; width:280px; font-size:14px; padding:6px 0; }
-        .invoice-total-row.final { font-size:18px; font-weight:700; border-top:2px solid #1e3a8a; padding-top:12px; color:#1e3a8a; }
-        .invoice-profit { text-align:right; font-size:16px; font-weight:700; margin-bottom:24px; }
-        .text-profit { color:#10b981; }
-        .text-loss { color:#ef4444; }
-        .invoice-footer { border-top:1px solid #e2e8f0; padding-top:20px; font-size:12px; color:var(--text-muted,#64748b); text-align:center; }
-        .badge-finalized { background:#ecfdf3; color:#166534; border:1px solid #d1fae5; }
-        .badge-draft { background:#f3f4f6; color:#4b5563; border:1px solid #e5e7eb; }
-        .btn-green { background:#10b981; color:white; }
-        .btn-green:hover { background:#059669; }
+
+        .invoice-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .invoice-page {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid var(--slate-200);
+            padding: 50px;
+            width: 100%;
+            max-width: 850px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03), 0 5px 15px -3px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Top modern accent stripe */
+        .invoice-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--slate-200);
+        }
+
+        .invoice-brand h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .invoice-brand p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 2px 0;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
+        }
+
+        .invoice-meta p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 3px 0;
+        }
+
+        .invoice-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .invoice-section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #4f46e5;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .invoice-card {
+            background: var(--slate-50);
+            border: 1px solid var(--slate-100);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .invoice-card p {
+            font-size: 14px;
+            margin: 6px 0;
+            color: var(--slate-700);
+            line-height: 1.5;
+        }
+
+        .invoice-card .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 8px;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 35px;
+        }
+
+        .invoice-table th {
+            background: var(--slate-50);
+            padding: 14px 18px;
+            text-align: left;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--slate-200);
+        }
+
+        .invoice-table td {
+            padding: 18px;
+            border-bottom: 1px solid var(--slate-100);
+            font-size: 14px;
+            color: var(--slate-800);
+        }
+
+        .vehicle-model {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 4px;
+        }
+
+        .vehicle-spec {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            gap: 12px;
+        }
+
+        .vehicle-spec span {
+            background: var(--slate-100);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .invoice-summary-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+
+        .payment-instructions {
+            flex: 1.2;
+            background: #fdfdfd;
+            border: 1px dashed var(--slate-200);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .payment-instructions h5 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: var(--slate-900);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-instructions p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .invoice-totals {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--slate-50);
+            border: 1px solid var(--slate-100);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 250px;
+        }
+
+        .invoice-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+            color: #64748b;
+        }
+
+        .invoice-total-row.final {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            border-top: 1.5px solid var(--slate-200);
+            padding-top: 12px;
+            margin-top: 8px;
+            color: var(--primary);
+        }
+
+        .invoice-footer {
+            border-top: 1px solid var(--slate-200);
+            padding-top: 25px;
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .badge-finalized {
+            background: #ecfdf3;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-draft {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-green:hover {
+            background: #059669;
+        }
     </style>
 </head>
 
@@ -110,91 +372,120 @@
             </span>
         </div>
 
-        <!-- Invoice body -->
-        <div class="invoice-page">
-            <div class="invoice-header">
-                <div class="invoice-brand">
-                    <h2>Vehicle Yard</h2>
-                    <p>Management System</p>
-                    <p style="margin-top:8px; color:var(--text-muted); font-size:13px;">vehicle@yard.com | +81-3-0000-0000</p>
-                </div>
-                <div class="invoice-meta">
-                    <h3>INVOICE</h3>
-                    <p>Invoice #<span th:text="${'INV-' + sale.id}">INV-1</span></p>
-                    <p th:text="${'Date: ' + sale.saleDate}">Date</p>
-                    <p th:if="${sale.saleStatus != null}" style="margin-top:8px;">
-                        <span class="badge"
-                            th:classappend="${sale.saleStatus.equalsIgnoreCase('FINALIZED')} ? 'badge-finalized' : 'badge-draft'"
-                            th:text="${sale.saleStatus}">Status</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="invoice-grid">
-                <div class="invoice-section">
-                    <h4>Bill To</h4>
-                    <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'REGULAR_COMPANY'}">
-                        <p style="font-weight:600; font-size:15px;" th:text="${sale.companyName}">Company</p>
-                        <p th:text="${sale.companyContactNumber}">Contact</p>
-                        <p th:text="${sale.companyAddress}">Address</p>
+        <!-- Invoice body container -->
+        <div class="invoice-container">
+            <div class="invoice-page">
+                <div class="invoice-header">
+                    <div class="invoice-brand">
+                        <h2>(株) YOMIRU商会</h2>
+                        <p>Yomiru Shokai Co., Ltd.</p>
+                        <p>袖ケ浦市吉田 132-2 (132-2 Yoshida, Sodegaura-shi, Chiba, Japan)</p>
+                        <p style="margin-top:8px; color:#64748b; font-size:12px;">
+                            <i class="fas fa-envelope"></i> janil1211@yahoo.com &nbsp;|&nbsp;
+                            <i class="fas fa-phone"></i> 0438-53-7581 &nbsp;|&nbsp;
+                            <i class="fas fa-mobile-alt"></i> 080-4910-5399
+                        </p>
                     </div>
-                    <div th:if="${sale.buyerType == null or sale.buyerType.name() != 'REGULAR_COMPANY'}">
-                        <p style="font-weight:600; font-size:15px;" th:text="${sale.customerName}">Customer</p>
-                        <p th:text="${sale.contactNumber}">Contact</p>
-                        <p th:text="${sale.email}">Email</p>
+                    <div class="invoice-meta">
+                        <h3>INVOICE</h3>
+                        <p style="font-weight: 600; color: var(--slate-900);">Invoice #<span th:text="${'INV-' + sale.id}">INV-1</span></p>
+                        <p th:text="${'Date: ' + sale.saleDate}">Date</p>
+                        <p th:if="${sale.saleStatus != null}" style="margin-top:8px;">
+                            <span th:class="${sale.saleStatus.equalsIgnoreCase('FINALIZED')} ? 'badge-finalized' : 'badge-draft'"
+                                th:text="${sale.saleStatus}">Status</span>
+                        </p>
                     </div>
                 </div>
-            </div>
 
-            <table class="invoice-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Details</th>
-                        <th style="text-align:right;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <strong th:text="${sale.vehicle != null ? (sale.vehicle.vehicleModel != null ? sale.vehicle.vehicleModel : 'Vehicle') : 'Vehicle'}">Model</strong>
-                        </td>
-                        <td>
-                            <span th:text="${'Chassis: ' + (sale.vehicle != null ? sale.vehicle.chassisNumber : '-')}">Chassis</span><br>
-                            <span th:text="${'Plate: ' + (sale.vehicle != null ? sale.vehicle.licensePlate : '-')}">Plate</span>
-                        </td>
-                        <td style="text-align:right; font-weight:600;" th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</td>
-                    </tr>
-                </tbody>
-            </table>
+                <div class="invoice-grid">
+                    <div>
+                        <div class="invoice-section-title"><i class="fas fa-file-invoice"></i> Bill To</div>
+                        <div class="invoice-card" th:switch="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}">
+                            <!-- Regular Customer -->
+                            <div th:th:case="'REGULAR_CUSTOMER'">
+                                <p class="name" th:text="${sale.customerName}">Customer Name</p>
+                                <p th:if="${sale.contactNumber != null and !sale.contactNumber.isEmpty()}"><i class="fas fa-phone" style="width: 16px;"></i> <span th:text="${sale.contactNumber}">Contact</span></p>
+                                <p th:if="${sale.email != null and !sale.email.isEmpty()}"><i class="fas fa-envelope" style="width: 16px;"></i> <span th:text="${sale.email}">Email</span></p>
+                            </div>
 
-            <div class="invoice-totals">
-                <div class="invoice-total-row">
-                    <span style="color:var(--text-muted);">Purchase Price</span>
-                    <span th:text="${sale.vehicle != null ? '¥' + #numbers.formatDecimal((sale.vehicle.purchasePrice != null ? sale.vehicle.purchasePrice : 0), 1, 0) : '-'}">¥0</span>
+                            <!-- Regular Company -->
+                            <div th:case="'REGULAR_COMPANY'">
+                                <p class="name" th:text="${sale.companyName}">Company Name</p>
+                                <p th:if="${sale.companyContactNumber != null and !sale.companyContactNumber.isEmpty()}"><i class="fas fa-phone" style="width: 16px;"></i> <span th:text="${sale.companyContactNumber}">Contact</span></p>
+                                <p th:if="${sale.companyAddress != null and !sale.companyAddress.isEmpty()}"><i class="fas fa-map-marker-alt" style="width: 16px;"></i> <span th:text="${sale.companyAddress}">Address</span></p>
+                            </div>
+
+                            <!-- Export Company -->
+                            <div th:case="'EXPORT'">
+                                <p class="name" th:text="${sale.companyName}">Company Name</p>
+                                <p th:if="${sale.exportCountry != null and !sale.exportCountry.isEmpty()}"><i class="fas fa-globe" style="width: 16px;"></i> <span th:text="|Export Destination: ${sale.exportCountry}|">Country</span></p>
+                                <p th:if="${sale.email != null and !sale.email.isEmpty()}"><i class="fas fa-envelope" style="width: 16px;"></i> <span th:text="${sale.email}">Email</span></p>
+                            </div>
+
+                            <!-- Auction House -->
+                            <div th:case="'AUCTION'">
+                                <p class="name" th:text="${sale.auctionHouseName}">Auction House</p>
+                                <p th:if="${sale.location != null and !sale.location.isEmpty()}"><i class="fas fa-map-marker-alt" style="width: 16px;"></i> <span th:text="${sale.location}">Location</span></p>
+                                <p th:if="${sale.lotNumber != null and !sale.lotNumber.isEmpty()}"><i class="fas fa-hashtag" style="width: 16px;"></i> <span th:text="|Lot Number: ${sale.lotNumber}|">Lot</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="invoice-section-title"><i class="fas fa-money-check-dollar"></i> Payment Info</div>
+                        <div class="invoice-card">
+                            <p style="margin-bottom: 4px;"><strong>Payment Terms:</strong></p>
+                            <p style="font-size: 13px; color: var(--slate-700);">Due on receipt of invoice</p>
+                            <p style="margin-top: 12px; margin-bottom: 4px;"><strong>Method:</strong></p>
+                            <p style="font-size: 13px; color: var(--slate-700);">
+                                <span th:text="${sale.vehicle != null ? (sale.vehicle.purchasePaymentMethod == 'BANK_TRANSFER' ? 'Bank Transfer' : 'Cash') : 'Cash'}">Cash</span>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="invoice-total-row">
-                    <span style="color:var(--text-muted);">Repair Costs</span>
-                    <span th:text="${sale.vehicle != null ? '¥' + #numbers.formatDecimal((sale.vehicle.repairCost != null ? sale.vehicle.repairCost : 0), 1, 0) : '-'}">¥0</span>
-                </div>
-                <div class="invoice-total-row final">
-                    <span>Sale Price</span>
-                    <span th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</span>
-                </div>
-            </div>
 
-            <!-- Profit/Loss -->
-            <div class="invoice-profit" th:if="${sale.profit != null}"
-                th:classappend="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'text-profit' : 'text-loss'}">
-                <span th:text="${sale.profit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'Net Profit: ¥' + #numbers.formatDecimal(sale.profit, 1, 0) : 'Net Loss: ¥' + #numbers.formatDecimal(sale.profit.abs(), 1, 0)}">
-                    Profit/Loss
-                </span>
-            </div>
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th style="text-align:right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="vehicle-model" th:text="${sale.vehicle != null ? (sale.vehicle.vehicleModel != null ? sale.vehicle.vehicleModel : 'Vehicle') : 'Vehicle'}">Vehicle Model</div>
+                                <div class="vehicle-spec">
+                                    <span th:if="${sale.vehicle != null and sale.vehicle.chassisNumber != null}" th:text="|Chassis: ${sale.vehicle.chassisNumber}|">Chassis</span>
+                                    <span th:if="${sale.vehicle != null and sale.vehicle.licensePlate != null}" th:text="|Plate: ${sale.vehicle.licensePlate}|">Plate</span>
+                                </div>
+                            </td>
+                            <td style="text-align:right; font-size:16px; font-weight:700; color: var(--slate-900);" th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <div class="invoice-footer">
-                <p>Thank you for your business. This is an official invoice from Vehicle Yard Management System.</p>
-                <p style="margin-top:6px;">Generated on: <span
-                        th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy')}">Today</span></p>
+                <div class="invoice-summary-section" style="justify-content: flex-end; margin-top: 24px;">
+                    <div class="invoice-totals" style="width: 100%; max-width: 320px; margin-left: auto;">
+                        <div class="invoice-total-row">
+                            <span>Subtotal</span>
+                            <span th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</span>
+                        </div>
+                        <div class="invoice-total-row">
+                            <span>Consumption Tax (8%)</span>
+                            <span>Included</span>
+                        </div>
+                        <div class="invoice-total-row final">
+                            <span>Total Due (¥)</span>
+                            <span th:text="${'¥' + #numbers.formatDecimal(sale.salePrice, 1, 0)}">¥0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="invoice-footer">
+                    <p>Thank you for your business. We look forward to working with you again.</p>
+                    <p style="margin-top:6px; font-size:11px; color:#94a3b8;">This is a system-generated document created by (株) YOMIRU商会. Generated: <span th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy HH:mm')}">Today</span></p>
+                </div>
             </div>
         </div>
     </main>

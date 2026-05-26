@@ -505,12 +505,12 @@
                 </div>
                 <div class="form-group">
                     <button type="button" class="btn btn-outline" id="importantNoteToggle" onclick="toggleImportantNote()">
-                        <i class="fas fa-note-sticky"></i> Important Note
+                        <i class="fas fa-note-sticky"></i> Add Important Note
                     </button>
                     <div id="importantNoteWrap" style="display:none; margin-top:12px;">
                         <label class="form-label">Important Note (Optional)</label>
                         <textarea name="importantNote" id="importantNote" class="form-control" rows="3"
-                            placeholder="Add any special details for this vehicle..."></textarea>
+                            placeholder="E.g. Accident history, special modifications, pending paperwork, import details..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -710,7 +710,7 @@
             document.getElementById('vehicleModelHidden').value = '';
             document.getElementById('importantNote').value = '';
             document.getElementById('importantNoteWrap').style.display = 'none';
-            document.getElementById('importantNoteToggle').innerHTML = '<i class="fas fa-note-sticky"></i> Important Note';
+            document.getElementById('importantNoteToggle').innerHTML = '<i class="fas fa-note-sticky"></i> Add Important Note';
         }
         function closeAddModal() {
             document.getElementById('addModal').classList.remove('active');
@@ -757,7 +757,8 @@
             wrap.style.display = isHidden ? 'block' : 'none';
             button.innerHTML = isHidden
                 ? '<i class="fas fa-note-sticky"></i> Hide Important Note'
-                : '<i class="fas fa-note-sticky"></i> Important Note';
+                : '<i class="fas fa-note-sticky"></i> Add Important Note';
+            if (isHidden) document.getElementById('importantNote').focus();
         }
 
         document.querySelector('#addModal form').addEventListener('submit', function (e) {

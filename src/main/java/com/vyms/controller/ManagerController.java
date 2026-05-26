@@ -335,6 +335,7 @@ public class ManagerController {
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "buyerName") String buyerName,
             @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
+            @RequestParam(name = "importantNote", required = false) String importantNote,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes ra) {
 
@@ -391,6 +392,7 @@ public class ManagerController {
             v.setSalePrice(salePrice);
             if (status != null)
                 v.setStatus(status);
+            v.setImportantNote(hasText(importantNote) ? importantNote.trim() : null);
 
             if (imageFile != null && !imageFile.isEmpty()) {
                 String imagePath = saveImage(imageFile);

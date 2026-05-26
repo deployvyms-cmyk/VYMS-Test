@@ -298,22 +298,51 @@
                             </div>
                         </td>
                         <td>
-                            <button class="btn btn-outline btn-sm" onclick="openEditModal(this)" th:data-id="${sale.id}"
-                                th:data-price="${sale.salePrice != null ? sale.salePrice : 0}"
-                                th:data-buyer="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}"
-                                th:data-customer="${sale.customerName != null ? sale.customerName : ''}"
-                                th:data-contact="${sale.contactNumber != null ? sale.contactNumber : ''}"
-                                th:data-email="${sale.email != null ? sale.email : ''}"
-                                th:data-company="${sale.companyName != null ? sale.companyName : ''}"
-                                th:data-company-address="${sale.companyAddress != null ? sale.companyAddress : ''}"
-                                th:data-company-contact="${sale.companyContactNumber != null ? sale.companyContactNumber : ''}"
-                                th:data-country="${sale.exportCountry != null ? sale.exportCountry : ''}"
-                                th:data-auction="${sale.auctionHouseName != null ? sale.auctionHouseName : ''}"
-                                th:data-location="${sale.location != null ? sale.location : ''}"
-                                th:data-lot="${sale.lotNumber != null ? sale.lotNumber : ''}"
-                                th:data-status="${sale.saleStatus != null ? sale.saleStatus : 'FINALIZED'}">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn btn-outline btn-sm" onclick="openDetailsModal(this)"
+                                    th:data-id="${sale.id}"
+                                    th:data-vehicle-model="${sale.vehicle != null ? (sale.vehicle.vehicleModel != null ? sale.vehicle.vehicleModel : 'Vehicle') : 'Vehicle'}"
+                                    th:data-vehicle-plate="${sale.vehicle != null ? sale.vehicle.licensePlate : ''}"
+                                    th:data-vehicle-chassis="${sale.vehicle != null ? sale.vehicle.chassisNumber : ''}"
+                                    th:data-purchase-price="${sale.vehicle != null ? (sale.vehicle.purchasePrice != null ? sale.vehicle.purchasePrice : 0) : 0}"
+                                    th:data-repair-cost="${sale.vehicle != null ? (sale.vehicle.repairCost != null ? sale.vehicle.repairCost : 0) : 0}"
+                                    th:data-sale-price="${sale.salePrice != null ? sale.salePrice : 0}"
+                                    th:data-profit="${sale.profit != null ? sale.profit : 0}"
+                                    th:data-buyer="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}"
+                                    th:data-customer="${sale.customerName != null ? sale.customerName : ''}"
+                                    th:data-contact="${sale.contactNumber != null ? sale.contactNumber : ''}"
+                                    th:data-email="${sale.email != null ? sale.email : ''}"
+                                    th:data-company="${sale.companyName != null ? sale.companyName : ''}"
+                                    th:data-company-address="${sale.companyAddress != null ? sale.companyAddress : ''}"
+                                    th:data-company-contact="${sale.companyContactNumber != null ? sale.companyContactNumber : ''}"
+                                    th:data-country="${sale.exportCountry != null ? sale.exportCountry : ''}"
+                                    th:data-auction="${sale.auctionHouseName != null ? sale.auctionHouseName : ''}"
+                                    th:data-location="${sale.location != null ? sale.location : ''}"
+                                    th:data-lot="${sale.lotNumber != null ? sale.lotNumber : ''}"
+                                    th:data-date="${sale.saleDate}"
+                                    th:data-status="${sale.saleStatus != null ? sale.saleStatus : 'FINALIZED'}"
+                                    th:data-invoice-sent="${sale.invoiceSent}"
+                                    th:data-invoice-sent-to="${sale.invoiceSentTo != null ? sale.invoiceSentTo : ''}"
+                                    th:data-invoice-sent-at="${sale.invoiceSentAt != null ? #temporals.format(sale.invoiceSentAt, 'yyyy-MM-dd HH:mm') : ''}">
+                                    <i class="fas fa-eye" style="color:var(--info);"></i> View
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="openEditModal(this)" th:data-id="${sale.id}"
+                                    th:data-price="${sale.salePrice != null ? sale.salePrice : 0}"
+                                    th:data-buyer="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}"
+                                    th:data-customer="${sale.customerName != null ? sale.customerName : ''}"
+                                    th:data-contact="${sale.contactNumber != null ? sale.contactNumber : ''}"
+                                    th:data-email="${sale.email != null ? sale.email : ''}"
+                                    th:data-company="${sale.companyName != null ? sale.companyName : ''}"
+                                    th:data-company-address="${sale.companyAddress != null ? sale.companyAddress : ''}"
+                                    th:data-company-contact="${sale.companyContactNumber != null ? sale.companyContactNumber : ''}"
+                                    th:data-country="${sale.exportCountry != null ? sale.exportCountry : ''}"
+                                    th:data-auction="${sale.auctionHouseName != null ? sale.auctionHouseName : ''}"
+                                    th:data-location="${sale.location != null ? sale.location : ''}"
+                                    th:data-lot="${sale.lotNumber != null ? sale.lotNumber : ''}"
+                                    th:data-status="${sale.saleStatus != null ? sale.saleStatus : 'FINALIZED'}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(sales)}">
@@ -587,6 +616,91 @@
         </div>
     </div>
 
+    <!-- View Details Modal -->
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border,#e2e8f0); padding-bottom: 16px; margin-bottom: 20px;">
+                <div>
+                    <h2 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-file-invoice" style="color: #4f46e5;"></i> Sale Details
+                    </h2>
+                    <p class="modal-subtitle">Comprehensive record of the transaction and profit/loss margins.</p>
+                </div>
+                <button class="modal-close" onclick="closeDetailsModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="details-body" style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Row 1: Vehicle & Buyer Overview -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Vehicle Card -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                        <h4 style="margin: 0 0 10px 0; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Vehicle Details</h4>
+                        <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px;" id="detVehicleModel">Model</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;"><strong>Plate:</strong> <span id="detVehiclePlate">-</span></div>
+                        <div style="font-size: 13px; color: #64748b;"><strong>Chassis:</strong> <span id="detVehicleChassis">-</span></div>
+                    </div>
+
+                    <!-- Buyer Card -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                        <h4 style="margin: 0 0 10px 0; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Buyer Details</h4>
+                        <div style="font-size: 13px; font-weight: 700; color: #4f46e5; margin-bottom: 6px;" id="detBuyerType">Regular Customer</div>
+                        <div id="detBuyerDetailsBlock" style="font-size: 13px; color: #334155; line-height: 1.5;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Financial Breakdown -->
+                <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                    <h4 style="margin: 0 0 16px 0; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-sack-dollar" style="color: #eab308;"></i> Financial Breakdown (Confidential)
+                    </h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+                        <div>
+                            <div style="font-size: 12px; color: #64748b;">Purchase Price</div>
+                            <div style="font-size: 16px; font-weight: 600; color: #0f172a;" id="detPurchasePrice">¥0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b;">Total Repair Costs</div>
+                            <div style="font-size: 16px; font-weight: 600; color: #0f172a;" id="detRepairCost">¥0</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px;">
+                        <span style="font-size: 13px; font-weight: 600; color: #334155;">Sale Price</span>
+                        <span style="font-size: 18px; font-weight: 700; color: #0f172a;" id="detSalePrice">¥0</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 8px;" id="detProfitContainer">
+                        <span style="font-size: 13px; font-weight: 700;">Net Profit / Loss</span>
+                        <span style="font-size: 18px; font-weight: 800;" id="detProfitVal">¥0</span>
+                    </div>
+                </div>
+
+                <!-- Row 3: Transaction Info -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 13px; color: #475569;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div><strong>Sale Date:</strong> <span id="detSaleDate" style="color: #0f172a;">-</span></div>
+                        <div><strong>Invoice Status:</strong> <span id="detSaleStatus" style="display: inline-block;">-</span></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div><strong>Invoiced Email:</strong> <span id="detInvoiceStatus" style="color: #0f172a;">Not Sent</span></div>
+                        <div id="detInvoiceMeta" style="font-size: 12px; color: #64748b;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid var(--border,#e2e8f0); padding-top: 16px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <a href="#" id="detInvoiceBtn" class="btn btn-outline" style="text-decoration: none;"><i class="fas fa-file-invoice"></i> View Invoice</a>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-outline" onclick="closeDetailsModal()">Close</button>
+                    <button type="button" class="btn btn-primary" id="detEditBtn"><i class="fas fa-edit"></i> Edit Record</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .field-error {
             display: block;
@@ -770,6 +884,110 @@
 
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
+        }
+
+        function openDetailsModal(btn) {
+            const data = btn.dataset;
+            
+            // Vehicle
+            document.getElementById('detVehicleModel').textContent = data.vehicleModel || 'Vehicle';
+            document.getElementById('detVehiclePlate').textContent = data.vehiclePlate || '-';
+            document.getElementById('detVehicleChassis').textContent = data.vehicleChassis || '-';
+            
+            // Buyer Type Title
+            const buyerTypeMap = {
+                'REGULAR_CUSTOMER': 'Regular Customer',
+                'REGULAR_COMPANY': 'Regular Company',
+                'EXPORT': 'Export Market Partner',
+                'AUCTION': 'Auction Sale'
+            };
+            document.getElementById('detBuyerType').textContent = buyerTypeMap[data.buyer] || data.buyer;
+            
+            // Buyer details card html
+            let buyerHtml = '';
+            if (data.buyer === 'REGULAR_CUSTOMER') {
+                buyerHtml = `<strong>Name:</strong> ${data.customer || '-'}<br>
+                             <strong>Phone:</strong> ${data.contact || '-'}<br>
+                             <strong>Email:</strong> ${data.email || '-'}`;
+            } else if (data.buyer === 'REGULAR_COMPANY') {
+                buyerHtml = `<strong>Company:</strong> ${data.company || '-'}<br>
+                             <strong>Phone:</strong> ${data.companyContact || '-'}<br>
+                             <strong>Address:</strong> ${data.companyAddress || '-'}`;
+            } else if (data.buyer === 'EXPORT') {
+                buyerHtml = `<strong>Company:</strong> ${data.company || '-'}<br>
+                             <strong>Country:</strong> ${data.country || '-'}<br>
+                             <strong>Email:</strong> ${data.email || '-'}`;
+            } else if (data.buyer === 'AUCTION') {
+                buyerHtml = `<strong>Auction House:</strong> ${data.auction || '-'}<br>
+                             <strong>Location:</strong> ${data.location || '-'}<br>
+                             <strong>Lot Number:</strong> ${data.lot || '-'}`;
+            }
+            document.getElementById('detBuyerDetailsBlock').innerHTML = buyerHtml;
+            
+            // Pricing values
+            const purchasePrice = parseFloat(data.purchasePrice || '0');
+            const repairCost = parseFloat(data.repairCost || '0');
+            const salePrice = parseFloat(data.salePrice || '0');
+            const profit = parseFloat(data.profit || '0');
+            
+            document.getElementById('detPurchasePrice').textContent = '¥' + purchasePrice.toLocaleString('ja-JP', {maximumFractionDigits: 0});
+            document.getElementById('detRepairCost').textContent = '¥' + repairCost.toLocaleString('ja-JP', {maximumFractionDigits: 0});
+            document.getElementById('detSalePrice').textContent = '¥' + salePrice.toLocaleString('ja-JP', {maximumFractionDigits: 0});
+            
+            // Profit block style and value
+            const profitContainer = document.getElementById('detProfitContainer');
+            const profitVal = document.getElementById('detProfitVal');
+            
+            profitVal.textContent = (profit >= 0 ? '+¥' : '-¥') + Math.abs(profit).toLocaleString('ja-JP', {maximumFractionDigits: 0});
+            if (profit >= 0) {
+                profitContainer.style.background = '#ecfdf3';
+                profitContainer.style.color = '#15803d';
+                profitContainer.style.border = '1px solid #d1fae5';
+            } else {
+                profitContainer.style.background = '#fee2e2';
+                profitContainer.style.color = '#b91c1c';
+                profitContainer.style.border = '1px solid #fecaca';
+            }
+            
+            // Details
+            document.getElementById('detSaleDate').textContent = data.date || '-';
+            
+            const statusEl = document.getElementById('detSaleStatus');
+            statusEl.textContent = data.status || 'DRAFT';
+            if (data.status === 'FINALIZED') {
+                statusEl.className = 'badge badge-finalized';
+            } else {
+                statusEl.className = 'badge badge-draft';
+            }
+            
+            // Invoice and Actions
+            document.getElementById('detInvoiceBtn').href = '/manager/sales/invoice/' + data.id;
+            
+            const invoiceSent = data.invoiceSent === 'true' || data.invoiceSent === true;
+            const statusLabel = document.getElementById('detInvoiceStatus');
+            const metaLabel = document.getElementById('detInvoiceMeta');
+            
+            if (invoiceSent) {
+                statusLabel.textContent = 'Sent Successfully';
+                statusLabel.style.color = '#10b981';
+                metaLabel.innerHTML = `<strong>To:</strong> ${data.invoiceSentTo}<br><strong>At:</strong> ${data.invoiceSentAt}`;
+            } else {
+                statusLabel.textContent = 'Not Sent Yet';
+                statusLabel.style.color = '#64748b';
+                metaLabel.innerHTML = 'Invoice has not been emailed to this buyer.';
+            }
+            
+            // Edit trigger
+            document.getElementById('detEditBtn').onclick = function() {
+                closeDetailsModal();
+                openEditModal(btn);
+            };
+            
+            document.getElementById('detailsModal').classList.add('active');
+        }
+        
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.remove('active');
         }
 
         let totalInvestment = 0;
