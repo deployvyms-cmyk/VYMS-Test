@@ -59,47 +59,54 @@
     <main class="main-content">
         <div class="page-header">
             <div class="page-title">
-                <h1>Dashboard</h1>
+                <h1>Dashboard Overview</h1>
                 <p th:text="${currentUser != null ? 'Welcome back, ' + currentUser.username : 'Welcome back, Admin User'}">Welcome back, Admin User</p>
+            </div>
+            <div class="header-actions">
+                <span class="date-badge"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
             </div>
         </div>
 
         <!-- High-level metrics -->
         <div class="metrics-grid">
-            <div class="metric-card">
+            <div class="metric-card card-blue">
                 <div class="metric-info">
                     <h3>Total Vehicles</h3>
                     <div class="metric-value" th:text="${totalVehicles}">0</div>
+                    <div class="metric-trend"><i class="fas fa-circle"></i> Active Yard Inventory</div>
                 </div>
                 <div class="metric-icon icon-blue">
                     <i class="fas fa-car"></i>
                 </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-card card-green">
                 <div class="metric-info">
                     <h3>Total Sales</h3>
                     <div class="metric-value" th:text="${totalSales}">0</div>
+                    <div class="metric-trend"><i class="fas fa-arrow-trend-up"></i> Completed Orders</div>
                 </div>
                 <div class="metric-icon icon-green">
                     <i class="fas fa-chart-line"></i>
                 </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-card card-purple">
                 <div class="metric-info">
                     <h3>Total Revenue</h3>
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">¥0</div>
+                    <div class="metric-trend"><i class="fas fa-wallet"></i> Gross Remittances</div>
                 </div>
                 <div class="metric-icon icon-purple">
                     <i class="fas fa-yen-sign"></i>
                 </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-card card-emerald">
                 <div class="metric-info">
                     <h3>Total Profit</h3>
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalProfit, 1, 0)}">¥0</div>
+                    <div class="metric-trend"><i class="fas fa-piggy-bank"></i> Net Earnings</div>
                 </div>
                 <div class="metric-icon icon-green">
                     <i class="fas fa-yen-sign"></i>
@@ -111,7 +118,7 @@
         <div class="charts-grid">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Overall Financials (Revenue vs Costs)</div>
+                    <div class="chart-title"><i class="fas fa-pie-chart text-indigo"></i> Overall Financials (Revenue vs Costs)</div>
                 </div>
                 <div class="chart-container">
                     <canvas id="financialsChart"></canvas>
@@ -120,7 +127,7 @@
 
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Sales Pipeline Output</div>
+                    <div class="chart-title"><i class="fas fa-bar-chart text-indigo"></i> Sales Pipeline Output</div>
                 </div>
                 <div class="chart-container">
                     <canvas id="pipelineChart"></canvas>
@@ -129,6 +136,14 @@
         </div>
 
     </main>
+
+    <!-- Date Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
+        });
+    </script>
 
     <!-- Scripts for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
