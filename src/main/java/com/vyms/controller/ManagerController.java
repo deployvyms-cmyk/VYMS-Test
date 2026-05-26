@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class ManagerController {
 
     // These patterns protect data quality even if browser validation is bypassed.
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^(\\+?94|0)?7\\d{8}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^(?:\\+81|0)(?:[\\s-]?\\d){9,10}$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UserService userService;

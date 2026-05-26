@@ -389,7 +389,7 @@
                     <div class="form-row">
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
-                            <input type="tel" name="contactNumber" id="recContactNumber" class="form-control" placeholder="07XXXXXXXX">
+                            <input type="tel" name="contactNumber" id="recContactNumber" class="form-control" placeholder="09012345678">
                             <span class="field-error" id="err-rec-contact"></span>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
@@ -413,7 +413,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
-                        <input type="tel" name="companyContactNumber" id="recCompanyContact" class="form-control" placeholder="07XXXXXXXX">
+                        <input type="tel" name="companyContactNumber" id="recCompanyContact" class="form-control" placeholder="03-1234-5678">
                         <span class="field-error" id="err-rec-company-contact"></span>
                     </div>
                 </div>
@@ -505,7 +505,7 @@
                     <div class="form-row">
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
-                            <input type="tel" name="contactNumber" id="editContactNumber" class="form-control" placeholder="07XXXXXXXX">
+                            <input type="tel" name="contactNumber" id="editContactNumber" class="form-control" placeholder="09012345678">
                             <span class="field-error" id="err-edit-contact"></span>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
@@ -529,7 +529,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
-                        <input type="tel" name="companyContactNumber" id="editCompanyContact" class="form-control" placeholder="07XXXXXXXX">
+                        <input type="tel" name="companyContactNumber" id="editCompanyContact" class="form-control" placeholder="03-1234-5678">
                         <span class="field-error" id="err-edit-company-contact"></span>
                     </div>
                 </div>
@@ -644,7 +644,7 @@
 
         function isValidPhone(value) {
             if (!value) return false;
-            return /^(\+?94|0)?7\d{8}$/.test(value.trim());
+            return /^(?:\+81|0)(?:[\s-]?\d){9,10}$/.test(value.trim());
         }
 
         function validateSale(prefix) {
@@ -669,7 +669,7 @@
                     valid = false;
                 }
                 if (!isValidPhone(phone)) {
-                    setError('err-' + prefix + '-contact', 'Use 07XXXXXXXX or +947XXXXXXXX');
+                    setError('err-' + prefix + '-contact', 'Use 09012345678 or +81 90 1234 5678');
                     valid = false;
                 }
                 if (!isValidEmail(email)) {
@@ -691,7 +691,7 @@
                     valid = false;
                 }
                 if (!isValidPhone(phone)) {
-                    setError('err-' + prefix + '-company-contact', 'Use 07XXXXXXXX or +947XXXXXXXX');
+                    setError('err-' + prefix + '-company-contact', 'Use 03-1234-5678 or +81 3 1234 5678');
                     valid = false;
                 }
             }
