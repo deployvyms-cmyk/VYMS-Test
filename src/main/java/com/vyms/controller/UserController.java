@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -34,6 +38,45 @@ public class UserController {
         this.userService = userService;
         this.vehicleService = vehicleService;
         this.saleService = saleService;
+    }
+
+    private static final Set<String> KNOWN_BRANDS = new LinkedHashSet<>(Arrays.asList(
+        "Toyota", "Honda", "Nissan", "Mazda", "Subaru", "Mitsubishi", "Suzuki",
+        "Lexus", "Daihatsu", "Isuzu", "Acura", "Infiniti",
+        "Jeep", "Ford", "BMW", "Mercedes", "Chevrolet", "Volkswagen",
+        "Hyundai", "Kia", "Audi", "Volvo", "Jaguar", "Land Rover", "Range Rover",
+        "Peugeot", "Renault", "Fiat", "Ferrari", "Porsche"
+    ));
+
+    private String extractBrand(String vehicleModel) {
+        if (vehicleModel == null || vehicleModel.isBlank()) return "Other";
+        String normalized = vehicleModel.trim();
+        String lower = normalized.toLowerCase();
+
+        String matched = null;
+        int matchedWords = 0;
+        for (String brand : KNOWN_BRANDS) {
+            String brandLower = brand.toLowerCase();
+            boolean match = lower.equals(brandLower)
+                    || lower.startsWith(brandLower + " ")
+                    || lower.startsWith(brandLower + "-");
+            if (match) {
+                int words = brand.split("\\s+").length;
+                if (words > matchedWords) {
+                    matched = brand;
+                    matchedWords = words;
+                }
+            }
+        }
+        if (matched != null) {
+            return matched;
+        }
+
+        String first = normalized.split("[\\s-]+", 2)[0];
+        for (String brand : KNOWN_BRANDS) {
+            if (brand.equalsIgnoreCase(first)) return brand;
+        }
+        return first.substring(0, 1).toUpperCase() + first.substring(1).toLowerCase();
     }
 
     @GetMapping("/users")
@@ -139,8 +182,11 @@ public class UserController {
 
         // Brand Stock Share
         Map<String, Long> brandCounts = vehicles.stream()
-                .filter(v -> v.getMake() != null && !v.getMake().isBlank())
-                .collect(Collectors.groupingBy(Vehicle::getMake, Collectors.counting()));
+                .collect(Collectors.groupingBy(v -> extractBrand(v.getVehicleModel()), Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
         model.addAttribute("brandLabels", new ArrayList<>(brandCounts.keySet()));
         model.addAttribute("brandData", new ArrayList<>(brandCounts.values()));
 
