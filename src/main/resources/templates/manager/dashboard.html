@@ -184,7 +184,12 @@
                             <div class="activity-avatar" th:text="${#strings.length(bName) >= 2 ? #strings.substring(bName, 0, 2).toUpperCase() : #strings.toUpperCase(bName)}">CU</div>
                             <div class="activity-info">
                                 <div class="activity-item-row">
-                                    <h4 th:text="${(sale.vehicle != null ? sale.vehicle.year : '') + ' ' + (sale.vehicle != null ? sale.vehicle.make : '') + ' ' + (sale.vehicle != null ? sale.vehicle.vehicleModel : 'Vehicle')}">2020 Honda Fit</h4>
+                                    <h4 th:text="${sale.vehicle != null ? 
+                                                   (sale.vehicle.vehicleModel != null && !sale.vehicle.vehicleModel.isEmpty() ? sale.vehicle.vehicleModel : 
+                                                    ((sale.vehicle.year != null ? sale.vehicle.year + ' ' : '') + 
+                                                     (sale.vehicle.make != null ? sale.vehicle.make + ' ' : '') + 
+                                                     (sale.vehicle.model != null ? sale.vehicle.model : '')).trim()) : 
+                                                   'Vehicle'}">2020 Honda Fit</h4>
                                     <span class="activity-price" th:text="'¥' + ${#numbers.formatDecimal(sale.salePrice, 1, 0)}">¥850,000</span>
                                 </div>
                                 <div class="activity-meta">
