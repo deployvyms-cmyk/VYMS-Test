@@ -569,17 +569,44 @@ public class ManagerController {
             @RequestParam("repairType") String repairType,
             @RequestParam("status") String status,
             RedirectAttributes ra) {
+        return doEditRepair(id, description, cost, repairType, status, ra);
+    }
+
+    /** Fixed-URL variant used by the Edit modal (no path variable needed). */
+    @PostMapping("/repair/update")
+    public String editRepairFixedUrl(
+            @RequestParam("repairId") Long id,
+            @RequestParam("description") String description,
+            @RequestParam("cost") BigDecimal cost,
+            @RequestParam("repairType") String repairType,
+            @RequestParam("status") String status,
+            RedirectAttributes ra) {
+        return doEditRepair(id, description, cost, repairType, status, ra);
+    }
+
+    private String doEditRepair(Long id, String description, BigDecimal cost,
+            String repairType, String status, RedirectAttributes ra) {
         Optional<Repair> repOpt = repairService.findById(id);
         repOpt.ifPresent(r -> {
             if (r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus())) {
                 ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
                 return;
             }
+            BigDecimal oldCost = r.getCost() != null ? r.getCost() : BigDecimal.ZERO;
+            BigDecimal newCost = cost != null ? cost : BigDecimal.ZERO;
+
             r.setDescription(description);
-            r.setCost(cost);
+            r.setCost(newCost);
             r.setRepairType(repairType);
             r.setStatus(status);
             repairService.save(r);
+
+            if (r.getVehicle() != null) {
+                Vehicle v = r.getVehicle();
+                BigDecimal currentTotal = v.getRepairCost() != null ? v.getRepairCost() : BigDecimal.ZERO;
+                v.setRepairCost(currentTotal.subtract(oldCost).add(newCost));
+                vehicleService.save(v);
+            }
         });
         return "redirect:/manager/repair";
     }

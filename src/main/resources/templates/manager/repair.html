@@ -150,7 +150,7 @@
                                 <a th:if="${r.status == 'PENDING' and (r.vehicle == null or r.vehicle.status != 'SOLD')}" th:href="@{/manager/repair/inspect/{id}(id=${r.id})}" class="btn btn-primary btn-sm" style="background:#10b981; border:none; text-decoration:none;">
                                     <i class="fas fa-check"></i> Inspect
                                 </a>
-                                <button class="btn btn-outline btn-sm" th:data-id="${r.id}" th:data-desc="${r.description}"
+                                <button type="button" class="btn btn-outline btn-sm" th:data-id="${r.id}" th:data-desc="${r.description}"
                                     th:data-cost="${r.cost}" th:data-type="${r.repairType}" th:data-status="${r.status}"
                                     th:disabled="${r.vehicle != null and r.vehicle.status == 'SOLD'}"
                                     onclick="openEditModal(this)">
@@ -220,8 +220,8 @@
                 </div>
                 <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
-            <form id="editForm" th:action="@{/manager/repair/edit/0}" method="post">
-                <input type="hidden" name="repairId" id="edit-repair-id" value="0">
+            <form id="editForm" th:action="@{/manager/repair/update}" method="post">
+                <input type="hidden" name="repairId" id="edit-repair-id" value="">
                 <div class="form-group">
                     <label class="form-label">Description</label>
                     <input type="text" name="description" id="edit-desc" class="form-control" required>
@@ -254,11 +254,7 @@
         </div>
     </div>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        var editBaseUrl = /*[[@{/manager/repair/edit/}]]*/ '/manager/repair/edit/';
-        /*]]>*/
-
+    <script>
         function openLogModal() {
             document.getElementById('logModal').classList.add('active');
         }
@@ -266,27 +262,49 @@
             document.getElementById('logModal').classList.remove('active');
         }
         function openEditModal(el) {
-            // Walk up to the button element if user clicked the <i> icon
-            var btn = el;
-            while (btn && btn.tagName !== 'BUTTON') {
-                btn = btn.parentElement;
+            try {
+                var btn = el;
+                while (btn && btn.tagName !== 'BUTTON') {
+                    btn = btn.parentElement;
+                }
+                if (!btn) {
+                    console.error("No BUTTON element found in parent chain of openEditModal click target");
+                    return;
+                }
+                
+                var ds = btn.dataset || {};
+                var id = btn.getAttribute('data-id') || ds.id || '';
+                var desc = btn.getAttribute('data-desc') || ds.desc || '';
+                var cost = btn.getAttribute('data-cost') || ds.cost || '';
+                var type = btn.getAttribute('data-type') || ds.type || 'INTERNAL';
+                var status = btn.getAttribute('data-status') || ds.status || 'PENDING';
+
+                var elId = document.getElementById('edit-repair-id');
+                var elDesc = document.getElementById('edit-desc');
+                var elCost = document.getElementById('edit-cost');
+                var elType = document.getElementById('edit-type');
+                var elStatus = document.getElementById('edit-status');
+
+                if (elId) elId.value = id;
+                if (elDesc) elDesc.value = desc;
+                if (elCost) elCost.value = cost;
+                if (elType) elType.value = type;
+                if (elStatus) elStatus.value = status;
+
+                var modal = document.getElementById('editModal');
+                if (modal) {
+                    modal.classList.add('active');
+                } else {
+                    console.error("Element #editModal not found");
+                }
+            } catch (e) {
+                console.error("Error in openEditModal:", e);
             }
-            if (!btn) return;
-            var d = btn.dataset;
-            var repairId = d.id;
-            document.getElementById('editForm').action = editBaseUrl + repairId;
-            document.getElementById('edit-repair-id').value = repairId;
-            document.getElementById('edit-desc').value = d.desc || '';
-            document.getElementById('edit-cost').value = d.cost || '';
-            document.getElementById('edit-type').value = d.type || 'INTERNAL';
-            document.getElementById('edit-status').value = d.status || 'PENDING';
-            document.getElementById('editModal').classList.add('active');
         }
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
         }
 
-        // Auto-open log modal if vehicleId is specified in URL parameter
         window.addEventListener('DOMContentLoaded', function() {
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('vehicleId')) {
