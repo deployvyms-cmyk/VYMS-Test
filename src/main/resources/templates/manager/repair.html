@@ -220,8 +220,8 @@
                 </div>
                 <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
-            <form id="editForm" th:action="@{/manager/repair/update}" method="post">
-                <input type="hidden" name="repairId" id="edit-repair-id" value="">
+            <form id="editForm" th:action="@{/manager/repair/edit/0}" method="post">
+                <input type="hidden" name="repairId" id="edit-repair-id" value="0">
                 <div class="form-group">
                     <label class="form-label">Description</label>
                     <input type="text" name="description" id="edit-desc" class="form-control" required>
@@ -246,15 +246,27 @@
                         <option value="INSPECTED">Inspected</option>
                     </select>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                <div class="modal-footer" style="justify-content:space-between;">
+                    <button type="submit" class="btn btn-danger" form="deleteForm"
+                        onclick="return confirm('Delete this repair record?')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
                 </div>
             </form>
+            <form id="deleteForm" method="post"></form>
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var editBaseUrl = /*[[@{/manager/repair/edit/}]]*/ '/manager/repair/edit/';
+        var deleteBaseUrl = /*[[@{/manager/repair/delete/}]]*/ '/manager/repair/delete/';
+        /*]]>*/
+
         function openLogModal() {
             document.getElementById('logModal').classList.add('active');
         }
@@ -290,6 +302,9 @@
                 if (elCost) elCost.value = cost;
                 if (elType) elType.value = type;
                 if (elStatus) elStatus.value = status;
+
+                document.getElementById('editForm').action = editBaseUrl + id;
+                document.getElementById('deleteForm').action = deleteBaseUrl + id;
 
                 var modal = document.getElementById('editModal');
                 if (modal) {

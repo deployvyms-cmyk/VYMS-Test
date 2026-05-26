@@ -586,39 +586,6 @@ public class ManagerController {
                 ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
                 return;
             }
-            r.setDescription(description);
-            r.setCost(cost);
-            r.setRepairType(repairType);
-            r.setStatus(status);
-            repairService.save(r);
-        });
-        return "redirect:/manager/repair";
-    }
-
-    /** Fixed-URL variant used by the Edit modal (no path variable needed). */
-    @PostMapping("/repair/update")
-    public String editRepairFixedUrl(
-            @RequestParam("repairId") Long id,
-            @RequestParam("description") String description,
-            @RequestParam("cost") BigDecimal cost,
-            @RequestParam("repairType") String repairType,
-            @RequestParam("status") String status,
-            RedirectAttributes ra) {
-        return doEditRepair(id, description, cost, repairType, status, ra);
-    }
-
-    private String doEditRepair(Long id, String description, BigDecimal cost,
-            String repairType, String status, RedirectAttributes ra) {
-        Optional<Repair> repOpt = repairService.findById(id);
-        repOpt.ifPresent(r -> {
-            if (r.getDeletedAt() != null) {
-                ra.addFlashAttribute("errorMsg", "This repair record was deleted.");
-                return;
-            }
-            if (r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus())) {
-                ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
-                return;
-            }
             BigDecimal oldCost = r.getCost() != null ? r.getCost() : BigDecimal.ZERO;
             BigDecimal newCost = cost != null ? cost : BigDecimal.ZERO;
 
@@ -635,6 +602,57 @@ public class ManagerController {
                 vehicleService.save(v);
             }
         });
+        return "redirect:/manager/repair";
+    }
+
+    @PostMapping("/repair/delete/{id}")
+    public String deleteRepair(@PathVariable("id") Long id,
+            jakarta.servlet.http.HttpSession session,
+            RedirectAttributes ra) {
+        Optional<Repair> repOpt = repairService.findById(id);
+        if (repOpt.isEmpty()) {
+            ra.addFlashAttribute("errorMsg", "Repair record not found.");
+            return "redirect:/manager/repair";
+        }
+
+        Repair repair = repOpt.get();
+        if (repair.getDeletedAt() != null) {
+            ra.addFlashAttribute("errorMsg", "This repair record was already deleted.");
+            return "redirect:/manager/repair";
+        }
+        if (repair.getVehicle() != null && "SOLD".equalsIgnoreCase(repair.getVehicle().getStatus())) {
+            ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
+            return "redirect:/manager/repair";
+        }
+
+        String username = Optional.ofNullable(session.getAttribute("currentUserName"))
+                .map(Object::toString)
+                .filter(name -> !name.isBlank())
+                .orElse("Unknown");
+
+        repairService.softDelete(repair, username);
+
+        Vehicle vehicle = repair.getVehicle();
+        if (vehicle != null) {
+            BigDecimal costValue = repair.getCost() != null ? repair.getCost() : BigDecimal.ZERO;
+            BigDecimal current = vehicle.getRepairCost() != null ? vehicle.getRepairCost() : BigDecimal.ZERO;
+            BigDecimal updated = current.subtract(costValue);
+            if (updated.compareTo(BigDecimal.ZERO) < 0) {
+                updated = BigDecimal.ZERO;
+            }
+            vehicle.setRepairCost(updated);
+            vehicleService.save(vehicle);
+        }
+
+        String vehicleLabel = repair.getVehicle() != null && repair.getVehicle().getVehicleModel() != null
+                ? repair.getVehicle().getVehicleModel()
+                : "Unknown vehicle";
+        systemLogService.createLog(
+                "REPAIR_DELETED",
+                "Repair record " + repair.getId() + " deleted for " + vehicleLabel,
+                username,
+                "SUCCESS");
+        ra.addFlashAttribute("successMsg", "Repair record deleted.");
         return "redirect:/manager/repair";
     }
 
@@ -1072,54 +1090,4 @@ public class ManagerController {
     // =========================================================================
     // Attendance download endpoint removed for deployment.
 
-    @PostMapping("/repair/delete/{id}")
-    public String deleteRepair(@PathVariable("id") Long id,
-            jakarta.servlet.http.HttpSession session,
-            RedirectAttributes ra) {
-        Optional<Repair> repOpt = repairService.findById(id);
-        if (repOpt.isEmpty()) {
-            ra.addFlashAttribute("errorMsg", "Repair record not found.");
-            return "redirect:/manager/repair";
-        }
-
-        Repair repair = repOpt.get();
-        if (repair.getDeletedAt() != null) {
-            ra.addFlashAttribute("errorMsg", "This repair record was already deleted.");
-            return "redirect:/manager/repair";
-        }
-        if (repair.getVehicle() != null && "SOLD".equalsIgnoreCase(repair.getVehicle().getStatus())) {
-            ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
-            return "redirect:/manager/repair";
-        }
-
-        String username = Optional.ofNullable(session.getAttribute("currentUserName"))
-                .map(Object::toString)
-                .filter(name -> !name.isBlank())
-                .orElse("Unknown");
-
-        repairService.softDelete(repair, username);
-
-        Vehicle vehicle = repair.getVehicle();
-        if (vehicle != null) {
-            BigDecimal cost = repair.getCost() != null ? repair.getCost() : BigDecimal.ZERO;
-            BigDecimal current = vehicle.getRepairCost() != null ? vehicle.getRepairCost() : BigDecimal.ZERO;
-            BigDecimal updated = current.subtract(cost);
-            if (updated.compareTo(BigDecimal.ZERO) < 0) {
-                updated = BigDecimal.ZERO;
-            }
-            vehicle.setRepairCost(updated);
-            vehicleService.save(vehicle);
-        }
-
-        String vehicleLabel = repair.getVehicle() != null && repair.getVehicle().getVehicleModel() != null
-                ? repair.getVehicle().getVehicleModel()
-                : "Unknown vehicle";
-        systemLogService.createLog(
-                "REPAIR_DELETED",
-                "Repair record " + repair.getId() + " deleted for " + vehicleLabel,
-                username,
-                "SUCCESS");
-        ra.addFlashAttribute("successMsg", "Repair record deleted.");
-        return "redirect:/manager/repair";
-    }
 }

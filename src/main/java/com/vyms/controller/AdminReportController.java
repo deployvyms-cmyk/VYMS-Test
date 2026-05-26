@@ -50,7 +50,8 @@ public class AdminReportController {
 
                 List<Sale> sales = saleService.findAll();
                 List<Vehicle> vehicles = vehicleService.findAll();
-                List<Repair> repairs = repairService.findAll();
+                List<Repair> repairs = repairService.findActive();
+                List<Repair> deletedRepairs = repairService.findDeleted();
 
                 // ── Sales Metrics ──────────────────────────────────────────────────────
                 BigDecimal totalRevenue = sales.stream()
@@ -98,6 +99,7 @@ public class AdminReportController {
                 model.addAttribute("unsoldVehicles", unsoldVehicles);
                 model.addAttribute("totalRepairCost", totalRepairCost);
                 model.addAttribute("totalRepairs", repairs.size());
+                model.addAttribute("deletedRepairs", deletedRepairs);
 
                 // ── Buyer Type Breakdown (for pie chart) ──────────────────────────────
                 Map<String, Long> buyerTypeCounts = new LinkedHashMap<>();
@@ -202,7 +204,7 @@ public class AdminReportController {
         public ResponseEntity<byte[]> downloadFullReport() {
                 List<Sale>    sales    = saleService.findAll();
                 List<Vehicle> vehicles = vehicleService.findAll();
-                List<Repair>  repairs  = repairService.findAll();
+                List<Repair>  repairs  = repairService.findActive();
                 byte[] pdf = pdfReportService.fullBusinessReport(sales, vehicles, repairs);
 
                 return ResponseEntity.ok()
@@ -211,7 +213,3 @@ public class AdminReportController {
                                 .body(pdf);
         }
 }
-
-
-
-// sri lankans

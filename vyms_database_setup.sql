@@ -48,6 +48,8 @@ CREATE TABLE repair (
     repair_date DATE,
     repair_type VARCHAR(50),          -- INTERNAL | EXTERNAL
     status      VARCHAR(50),          -- PENDING | INSPECTED
+    deleted_at  TIMESTAMP WITHOUT TIME ZONE,
+    deleted_by  VARCHAR(255),
     CONSTRAINT FK_repair_vehicle FOREIGN KEY (vehicle_id)
         REFERENCES vehicle(id) ON DELETE CASCADE
 );

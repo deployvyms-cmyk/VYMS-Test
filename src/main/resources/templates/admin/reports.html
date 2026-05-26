@@ -155,6 +155,12 @@
         .inv-stat .val.red {
             color: #dc2626;
         }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -380,6 +386,49 @@
                     <tr th:if="${recentRepairs == null or recentRepairs.empty}">
                         <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">No repair
                             records yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Deleted Repair Records -->
+        <div class="table-card no-print" style="margin-top:24px;">
+            <div class="table-header">
+                <div class="table-title">Deleted Repair Records</div>
+                <span style="font-size:13px;color:var(--text-muted);"
+                    th:text="${deletedRepairs != null ? deletedRepairs.size() + ' deleted records' : '0 deleted records'}"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Cost</th>
+                        <th>Deleted At</th>
+                        <th>Deleted By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${deletedRepairs}">
+                        <td>
+                            <div style="font-weight:600;" th:text="${r.vehicle != null ? r.vehicle.vehicleModel : '--'}">--</div>
+                            <div style="font-size:12px;color:var(--text-muted);"
+                                th:text="${r.vehicle != null ? r.vehicle.licensePlate : ''}"></div>
+                        </td>
+                        <td style="max-width:200px;" th:text="${r.description}">--</td>
+                        <td>
+                            <span class="repair-badge badge-int" th:if="${r.repairType == 'INTERNAL'}">Internal</span>
+                            <span class="repair-badge badge-ext" th:if="${r.repairType == 'EXTERNAL'}">External</span>
+                            <span th:if="${r.repairType != 'INTERNAL' and r.repairType != 'EXTERNAL'}"
+                                th:text="${r.repairType}">--</span>
+                        </td>
+                        <td style="font-weight:600;" th:text="${r.cost != null ? '¥' + #numbers.formatDecimal(r.cost, 1, 0) : '¥0'}">¥0</td>
+                        <td th:text="${r.deletedAt}">--</td>
+                        <td th:text="${r.deletedBy != null ? r.deletedBy : '--'}">--</td>
+                    </tr>
+                    <tr th:if="${deletedRepairs == null or deletedRepairs.empty}">
+                        <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">No deleted repairs.</td>
                     </tr>
                 </tbody>
             </table>
