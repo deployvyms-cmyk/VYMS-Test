@@ -21,6 +21,10 @@ public class Vehicle {
 
     private BigDecimal purchasePrice;
 
+    private String buyerName;
+
+    private String purchasePaymentMethod;
+
     private BigDecimal repairCost;
 
     private BigDecimal salePrice;
@@ -81,6 +85,22 @@ public class Vehicle {
 
     public void setPurchasePrice(BigDecimal purchasePrice) {
         this.purchasePrice = purchasePrice;
+    }
+
+    public String getBuyerName() {
+        return buyerName;
+    }
+
+    public void setBuyerName(String buyerName) {
+        this.buyerName = buyerName;
+    }
+
+    public String getPurchasePaymentMethod() {
+        return purchasePaymentMethod;
+    }
+
+    public void setPurchasePaymentMethod(String purchasePaymentMethod) {
+        this.purchasePaymentMethod = purchasePaymentMethod;
     }
 
     public BigDecimal getRepairCost() {

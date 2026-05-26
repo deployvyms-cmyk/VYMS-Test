@@ -361,8 +361,13 @@
                     <div class="detail-row">
                         Purchase Cost <span><th:block th:text="${vehicle.purchasePrice != null ? '¥' + #numbers.formatDecimal(vehicle.purchasePrice, 1, 0) : '¥0'}"></th:block></span>
                     </div>
-                    <div class="detail-row">
-                        Repair Expense <span th:style="${vehicle.repairCost != null and vehicle.repairCost.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'color:#ef4444;' : ''"><th:block th:text="${vehicle.repairCost != null ? '¥' + #numbers.formatDecimal(vehicle.repairCost, 1, 0) : '¥0'}"></th:block></span>
+                    <div class="detail-row" th:if="${vehicle.buyerName != null}">
+                        Buyer <span><th:block th:text="${vehicle.buyerName}"></th:block></span>
+                    </div>
+                    <div class="detail-row" th:if="${vehicle.purchasePaymentMethod != null}">
+                        Payment Method <span>
+                            <th:block th:text="${vehicle.purchasePaymentMethod == 'BANK_TRANSFER' ? 'Bank Transfer' : 'Cash'}"></th:block>
+                        </span>
                     </div>
                     <div class="detail-row" th:if="${vehicle.addedDate != null}">
                         Date Registered <span><th:block th:text="${vehicle.addedDate}"></th:block></span>
@@ -438,6 +443,19 @@
                 <div class="form-group">
                     <label class="form-label">Purchase Price (¥)</label>
                     <input type="number" name="purchasePrice" class="form-control" placeholder="0" step="1" min="0">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Buyer Name</label>
+                        <input type="text" name="buyerName" class="form-control" placeholder="Buyer name" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Payment Method</label>
+                        <select name="purchasePaymentMethod" class="form-control" required>
+                            <option value="CASH">Cash</option>
+                            <option value="BANK_TRANSFER">Bank Transfer</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Vehicle Image</label>

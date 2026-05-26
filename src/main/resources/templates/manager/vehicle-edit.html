@@ -259,6 +259,23 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Buyer Name</label>
+                            <input type="text" name="buyerName" class="form-control" placeholder="Buyer name"
+                                th:disabled="${vehicle != null and vehicle.status == 'SOLD'}"
+                                th:value="${vehicle.buyerName}" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Payment Method</label>
+                            <select name="purchasePaymentMethod" class="form-control"
+                                th:disabled="${vehicle != null and vehicle.status == 'SOLD'}" required>
+                                <option value="CASH" th:selected="${vehicle.purchasePaymentMethod == 'CASH'}">Cash</option>
+                                <option value="BANK_TRANSFER" th:selected="${vehicle.purchasePaymentMethod == 'BANK_TRANSFER'}">Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-row" style="margin-top: 16px;">
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label">Sale Price (¥)</label>

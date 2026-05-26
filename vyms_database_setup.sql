@@ -24,6 +24,8 @@ CREATE TABLE vehicle (
     license_plate  VARCHAR(255),
     vehicle_model  VARCHAR(255),
     purchase_price DECIMAL(19, 2),
+    buyer_name     VARCHAR(255),
+    purchase_payment_method VARCHAR(30),
     repair_cost    DECIMAL(19, 2),
     sale_price     DECIMAL(19, 2),
     status         VARCHAR(50),       -- UNSOLD | SOLD

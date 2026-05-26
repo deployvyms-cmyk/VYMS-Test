@@ -81,6 +81,14 @@ public class ManagerController {
         return hasText(phone) && PHONE_PATTERN.matcher(phone.trim()).matches();
     }
 
+    private boolean isValidPaymentMethod(String method) {
+        if (!hasText(method)) {
+            return false;
+        }
+        String normalized = method.trim().toUpperCase();
+        return normalized.equals("CASH") || normalized.equals("BANK_TRANSFER");
+    }
+
     private boolean hasInvalidSaleInputs(BuyerType buyerType,
             BigDecimal salePrice,
             String customerName,
@@ -240,11 +248,15 @@ public class ManagerController {
             @RequestParam(name = "brandTyped", required = false) String brandTyped,
             @RequestParam(name = "modelInput", required = false) String modelInput,
             @RequestParam(name = "purchasePrice", required = false) BigDecimal purchasePrice,
+            @RequestParam(name = "buyerName") String buyerName,
+            @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes ra) throws IOException {
 
         String chassis = chassisNumber != null ? chassisNumber.trim().toUpperCase() : "";
         String plate = licensePlate != null ? licensePlate.trim().toUpperCase() : "";
+        String normalizedBuyer = normalize(buyerName);
+        String normalizedPayment = normalize(purchasePaymentMethod);
 
         if (vehicleService.existsByChassisNumber(chassis)) {
             ra.addFlashAttribute("errorMsg", "A vehicle with this chassis number already exists.");
@@ -252,6 +264,15 @@ public class ManagerController {
         }
         if (vehicleService.existsByLicensePlate(plate)) {
             ra.addFlashAttribute("errorMsg", "A vehicle with this license plate already exists.");
+            return "redirect:/manager/inventory";
+        }
+
+        if (!hasText(normalizedBuyer)) {
+            ra.addFlashAttribute("errorMsg", "Buyer name is required.");
+            return "redirect:/manager/inventory";
+        }
+        if (!isValidPaymentMethod(normalizedPayment)) {
+            ra.addFlashAttribute("errorMsg", "Payment method must be Cash or Bank Transfer.");
             return "redirect:/manager/inventory";
         }
 
@@ -272,6 +293,8 @@ public class ManagerController {
         v.setLicensePlate(plate);
         v.setVehicleModel(resolvedModel);
         v.setPurchasePrice(purchasePrice != null ? purchasePrice : BigDecimal.ZERO);
+        v.setBuyerName(normalizedBuyer);
+        v.setPurchasePaymentMethod(normalizedPayment.toUpperCase());
         v.setRepairCost(BigDecimal.ZERO);
         v.setStatus("UNSOLD");
         v.setAddedDate(LocalDate.now());
@@ -308,11 +331,15 @@ public class ManagerController {
             @RequestParam(name = "repairCost", required = false) BigDecimal repairCost,
             @RequestParam(name = "salePrice", required = false) BigDecimal salePrice,
             @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "buyerName") String buyerName,
+            @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes ra) {
 
         String chassis = chassisNumber != null ? chassisNumber.trim().toUpperCase() : "";
         String plate = licensePlate != null ? licensePlate.trim().toUpperCase() : "";
+        String normalizedBuyer = normalize(buyerName);
+        String normalizedPayment = normalize(purchasePaymentMethod);
 
         Optional<Vehicle> vehicleOpt = vehicleService.findById(id);
         if (vehicleOpt.isEmpty()) {
@@ -323,6 +350,15 @@ public class ManagerController {
         Vehicle current = vehicleOpt.get();
         if ("SOLD".equalsIgnoreCase(current.getStatus())) {
             ra.addFlashAttribute("errorMsg", "Sold vehicles are locked and cannot be edited.");
+            return "redirect:/manager/inventory/edit/" + id;
+        }
+
+        if (!hasText(normalizedBuyer)) {
+            ra.addFlashAttribute("errorMsg", "Buyer name is required.");
+            return "redirect:/manager/inventory/edit/" + id;
+        }
+        if (!isValidPaymentMethod(normalizedPayment)) {
+            ra.addFlashAttribute("errorMsg", "Payment method must be Cash or Bank Transfer.");
             return "redirect:/manager/inventory/edit/" + id;
         }
 
@@ -347,6 +383,8 @@ public class ManagerController {
             v.setLicensePlate(plate);
             v.setVehicleModel(resolvedModel);
             v.setPurchasePrice(purchasePrice != null ? purchasePrice : BigDecimal.ZERO);
+            v.setBuyerName(normalizedBuyer);
+            v.setPurchasePaymentMethod(normalizedPayment.toUpperCase());
             v.setRepairCost(repairCost != null ? repairCost : BigDecimal.ZERO);
             v.setSalePrice(salePrice);
             if (status != null)
