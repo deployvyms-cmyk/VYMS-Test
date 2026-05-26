@@ -150,10 +150,9 @@
                                 <a th:if="${r.status == 'PENDING' and (r.vehicle == null or r.vehicle.status != 'SOLD')}" th:href="@{/manager/repair/inspect/{id}(id=${r.id})}" class="btn btn-primary btn-sm" style="background:#10b981; border:none; text-decoration:none;">
                                     <i class="fas fa-check"></i> Inspect
                                 </a>
-                                <button type="button" class="btn btn-outline btn-sm" th:data-id="${r.id}" th:data-desc="${r.description}"
+                                <button type="button" class="btn btn-outline btn-sm js-repair-edit" th:data-id="${r.id}" th:data-desc="${r.description}"
                                     th:data-cost="${r.cost}" th:data-type="${r.repairType}" th:data-status="${r.status}"
-                                    th:disabled="${r.vehicle != null and r.vehicle.status == 'SOLD'}"
-                                    onclick="openEditModal(this)">
+                                    th:disabled="${r.vehicle != null and r.vehicle.status == 'SOLD'}">
                                     <i class="fas fa-pencil-alt"></i> Edit
                                 </button>
                             </div>
@@ -280,12 +279,15 @@
                     btn = btn.parentElement;
                 }
                 if (!btn) {
-                    console.error("No BUTTON element found in parent chain of openEditModal click target");
                     return;
                 }
-                
+
                 var ds = btn.dataset || {};
                 var id = btn.getAttribute('data-id') || ds.id || '';
+                if (!id) {
+                    return;
+                }
+
                 var desc = btn.getAttribute('data-desc') || ds.desc || '';
                 var cost = btn.getAttribute('data-cost') || ds.cost || '';
                 var type = btn.getAttribute('data-type') || ds.type || 'INTERNAL';
@@ -303,17 +305,17 @@
                 if (elType) elType.value = type;
                 if (elStatus) elStatus.value = status;
 
-                document.getElementById('editForm').action = editBaseUrl + id;
-                document.getElementById('deleteForm').action = deleteBaseUrl + id;
+                var editForm = document.getElementById('editForm');
+                var deleteForm = document.getElementById('deleteForm');
+                if (editForm) editForm.action = editBaseUrl + id;
+                if (deleteForm) deleteForm.action = deleteBaseUrl + id;
 
                 var modal = document.getElementById('editModal');
                 if (modal) {
                     modal.classList.add('active');
-                } else {
-                    console.error("Element #editModal not found");
                 }
             } catch (e) {
-                console.error("Error in openEditModal:", e);
+                // Swallow errors so UI doesn't lock up
             }
         }
         function closeEditModal() {
@@ -321,6 +323,13 @@
         }
 
         window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.js-repair-edit').forEach(function(btn) {
+                btn.addEventListener('click', function(ev) {
+                    ev.preventDefault();
+                    openEditModal(btn);
+                });
+            });
+
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('vehicleId')) {
                 openLogModal();
