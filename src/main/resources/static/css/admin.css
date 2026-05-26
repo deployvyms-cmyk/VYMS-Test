@@ -963,3 +963,48 @@ select.form-control {
   transition: opacity 0.2s;
 }
 .sidebar-logo img:hover { opacity: 0.85; }
+
+/* Premium Page & Flash Alerts */
+.page-alert,
+.flash-success,
+.flash-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-alert-success,
+.flash-success {
+  background: rgba(99, 102, 241, 0.06); /* Soft Indigo/Purple System background */
+  color: #4f46e5; /* Primary Indigo/Purple theme */
+  border-color: rgba(99, 102, 241, 0.18);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.05);
+}
+
+.page-alert-error,
+.flash-error {
+  background: rgba(239, 68, 68, 0.06); /* Soft red background */
+  color: #ef4444; /* Soft red text */
+  border-color: rgba(239, 68, 68, 0.18);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);
+}
+
+.page-alert-warning {
+  background: rgba(245, 158, 11, 0.06); /* Soft amber background */
+  color: #d97706; /* Soft amber text */
+  border-color: rgba(245, 158, 11, 0.18);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.05);
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
