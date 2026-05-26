@@ -87,6 +87,8 @@ public class ManagerController {
             String contactNumber,
             String email,
             String companyName,
+            String companyAddress,
+            String companyContactNumber,
             String exportCountry,
             String auctionHouseName,
             String location) {
@@ -101,6 +103,13 @@ public class ManagerController {
                     && customerName.trim().length() >= 2
                     && isValidPhone(contactNumber)
                     && isValidEmail(email));
+        }
+        if (buyerType == BuyerType.REGULAR_COMPANY) {
+            return !(hasText(companyName)
+                    && companyName.trim().length() >= 2
+                    && hasText(companyAddress)
+                    && companyAddress.trim().length() >= 2
+                    && isValidPhone(companyContactNumber));
         }
         if (buyerType == BuyerType.EXPORT) {
             return !(hasText(companyName)
@@ -720,6 +729,8 @@ public class ManagerController {
             @RequestParam(name = "contactNumber", required = false) String contactNumber,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "companyName", required = false) String companyName,
+            @RequestParam(name = "companyAddress", required = false) String companyAddress,
+            @RequestParam(name = "companyContactNumber", required = false) String companyContactNumber,
             @RequestParam(name = "exportCountry", required = false) String exportCountry,
             @RequestParam(name = "auctionHouseName", required = false) String auctionHouseName,
             @RequestParam(name = "location", required = false) String location,
@@ -732,7 +743,7 @@ public class ManagerController {
         }
 
         if (hasInvalidSaleInputs(resolvedBuyerType, salePrice, customerName, contactNumber, email,
-                companyName, exportCountry, auctionHouseName, location)) {
+                companyName, companyAddress, companyContactNumber, exportCountry, auctionHouseName, location)) {
             return "redirect:/manager/sales";
         }
 
@@ -753,6 +764,10 @@ public class ManagerController {
                 sale.setCustomerName(normalize(customerName));
                 sale.setContactNumber(normalize(contactNumber));
                 sale.setEmail(normalize(email));
+            } else if (resolvedBuyerType == BuyerType.REGULAR_COMPANY) {
+                sale.setCompanyName(normalize(companyName));
+                sale.setCompanyAddress(normalize(companyAddress));
+                sale.setCompanyContactNumber(normalize(companyContactNumber));
             } else if (resolvedBuyerType == BuyerType.EXPORT) {
                 sale.setCompanyName(normalize(companyName));
                 sale.setExportCountry(normalize(exportCountry));
@@ -779,6 +794,8 @@ public class ManagerController {
             @RequestParam(name = "contactNumber", required = false) String contactNumber,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "companyName", required = false) String companyName,
+            @RequestParam(name = "companyAddress", required = false) String companyAddress,
+            @RequestParam(name = "companyContactNumber", required = false) String companyContactNumber,
             @RequestParam(name = "exportCountry", required = false) String exportCountry,
             @RequestParam(name = "auctionHouseName", required = false) String auctionHouseName,
             @RequestParam(name = "location", required = false) String location,
@@ -792,7 +809,7 @@ public class ManagerController {
         }
 
         if (hasInvalidSaleInputs(resolvedBuyerType, salePrice, customerName, contactNumber, email,
-                companyName, exportCountry, auctionHouseName, location)) {
+                companyName, companyAddress, companyContactNumber, exportCountry, auctionHouseName, location)) {
             return "redirect:/manager/sales";
         }
 
@@ -806,6 +823,8 @@ public class ManagerController {
             s.setContactNumber(null);
             s.setEmail(null);
             s.setCompanyName(null);
+            s.setCompanyAddress(null);
+            s.setCompanyContactNumber(null);
             s.setExportCountry(null);
             s.setAuctionHouseName(null);
             s.setLocation(null);
@@ -815,6 +834,10 @@ public class ManagerController {
                 s.setCustomerName(normalize(customerName));
                 s.setContactNumber(normalize(contactNumber));
                 s.setEmail(normalize(email));
+            } else if (resolvedBuyerType == BuyerType.REGULAR_COMPANY) {
+                s.setCompanyName(normalize(companyName));
+                s.setCompanyAddress(normalize(companyAddress));
+                s.setCompanyContactNumber(normalize(companyContactNumber));
             } else if (resolvedBuyerType == BuyerType.EXPORT) {
                 s.setCompanyName(normalize(companyName));
                 s.setExportCountry(normalize(exportCountry));

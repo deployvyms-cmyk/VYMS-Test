@@ -34,6 +34,8 @@ public class Sale {
 
     // Export specific
     private String companyName;
+    private String companyAddress;
+    private String companyContactNumber;
     private String exportCountry;
 
     // Auction specific
@@ -143,6 +145,12 @@ public class Sale {
 
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
+
+    public String getCompanyAddress() { return companyAddress; }
+    public void setCompanyAddress(String companyAddress) { this.companyAddress = companyAddress; }
+
+    public String getCompanyContactNumber() { return companyContactNumber; }
+    public void setCompanyContactNumber(String companyContactNumber) { this.companyContactNumber = companyContactNumber; }
 
     public String getExportCountry() { return exportCountry; }
     public void setExportCountry(String exportCountry) { this.exportCountry = exportCountry; }

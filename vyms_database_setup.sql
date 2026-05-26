@@ -58,10 +58,13 @@ CREATE TABLE sale (
     seller_id      BIGINT,
     sale_price     DECIMAL(19, 2),
     sale_date      DATE,
-    buyer_type     VARCHAR(20),       -- REGULAR_CUSTOMER | AUCTION | EXPORT
+    buyer_type     VARCHAR(20),       -- REGULAR_CUSTOMER | REGULAR_COMPANY | AUCTION | EXPORT
     customer_name  VARCHAR(255),
     contact_number VARCHAR(255),
     email          VARCHAR(255),
+    company_name   VARCHAR(255),
+    company_address VARCHAR(255),
+    company_contact_number VARCHAR(255),
     sale_status    VARCHAR(50),       -- DRAFT | FINALIZED
     total_cost     DECIMAL(19, 2),     -- Snapshot of purchasePrice + repairCost at sale time
     CONSTRAINT FK_sale_vehicle FOREIGN KEY (vehicle_id) REFERENCES vehicle(id),

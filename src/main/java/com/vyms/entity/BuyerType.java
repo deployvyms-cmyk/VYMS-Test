@@ -9,6 +9,8 @@ package com.vyms.entity;
 public enum BuyerType {
     // Buyer is a normal customer purchasing a vehicle directly.
     REGULAR_CUSTOMER,
+    // Buyer is a company purchasing directly.
+    REGULAR_COMPANY,
     // Buyer purchases through auction process.
     AUCTION,
     // Buyer purchases for export market.

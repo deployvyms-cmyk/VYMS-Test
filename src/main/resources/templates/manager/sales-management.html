@@ -14,6 +14,12 @@
             border: 1px solid #bfdbfe;
         }
 
+        .badge-company {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde68a;
+        }
+
         .badge-export {
             background: #e0f2fe;
             color: #0369a1;
@@ -221,13 +227,17 @@
                         </td>
                         <td>
                             <span class="badge"
-                                th:classappend="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'badge-regular' : (sale.buyerType.name() == 'EXPORT' ? 'badge-export' : 'badge-auction')) : 'badge-draft'}"
-                                th:text="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'Regular' : (sale.buyerType.name() == 'EXPORT' ? 'Export' : 'Auction')) : '-'}">Type</span>
+                                th:classappend="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'badge-regular' : (sale.buyerType.name() == 'REGULAR_COMPANY' ? 'badge-company' : (sale.buyerType.name() == 'EXPORT' ? 'badge-export' : 'badge-auction'))) : 'badge-draft'}"
+                                th:text="${sale.buyerType != null ? (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? 'Regular Customer' : (sale.buyerType.name() == 'REGULAR_COMPANY' ? 'Regular Company' : (sale.buyerType.name() == 'EXPORT' ? 'Export' : 'Auction'))) : '-'}">Type</span>
                         </td>
                         <td>
                             <div th:if="${sale.buyerType == null or sale.buyerType.name() == 'REGULAR_CUSTOMER'}">
                                 <div style="font-weight:600;" th:text="${sale.customerName != null ? sale.customerName : 'N/A'}">Name</div>
                                 <div class="customer-email" th:if="${sale.email != null and !#strings.isEmpty(sale.email)}" th:text="${sale.email}">email</div>
+                            </div>
+                            <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'REGULAR_COMPANY'}">
+                                <div style="font-weight:600;" th:text="${sale.companyName != null ? sale.companyName : 'N/A'}">Company</div>
+                                <div class="customer-email" th:if="${sale.companyAddress != null and !#strings.isEmpty(sale.companyAddress)}" th:text="${sale.companyAddress}">address</div>
                             </div>
                             <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'EXPORT'}">
                                 <div style="font-weight:600;" th:text="${sale.companyName != null ? sale.companyName : 'N/A'}">Company</div>
@@ -243,6 +253,16 @@
                                 <i class="fas fa-phone"></i>
                                 <span th:text="${sale.contactNumber != null and !#strings.isEmpty(sale.contactNumber) ? sale.contactNumber : '--'}">Contact</span>
                             </span>
+                            <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'REGULAR_COMPANY'}">
+                                <span class="contact-entry">
+                                    <i class="fas fa-phone"></i>
+                                    <span th:text="${sale.companyContactNumber != null and !#strings.isEmpty(sale.companyContactNumber) ? sale.companyContactNumber : '--'}">Contact</span>
+                                </span>
+                                <span class="contact-entry">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span th:text="${sale.companyAddress != null and !#strings.isEmpty(sale.companyAddress) ? sale.companyAddress : '--'}">Address</span>
+                                </span>
+                            </div>
                             <span class="contact-entry" th:if="${sale.buyerType != null and sale.buyerType.name() == 'EXPORT'}">
                                 <i class="fas fa-globe"></i>
                                 <span th:text="${sale.exportCountry != null and !#strings.isEmpty(sale.exportCountry) ? sale.exportCountry : '--'}">Country</span>
@@ -285,6 +305,8 @@
                                 th:data-contact="${sale.contactNumber != null ? sale.contactNumber : ''}"
                                 th:data-email="${sale.email != null ? sale.email : ''}"
                                 th:data-company="${sale.companyName != null ? sale.companyName : ''}"
+                                th:data-company-address="${sale.companyAddress != null ? sale.companyAddress : ''}"
+                                th:data-company-contact="${sale.companyContactNumber != null ? sale.companyContactNumber : ''}"
                                 th:data-country="${sale.exportCountry != null ? sale.exportCountry : ''}"
                                 th:data-auction="${sale.auctionHouseName != null ? sale.auctionHouseName : ''}"
                                 th:data-location="${sale.location != null ? sale.location : ''}"
@@ -339,6 +361,7 @@
                         <label class="form-label">Buyer Type</label>
                         <select name="buyerType" id="recBuyerType" class="form-control" required onchange="toggleBuyerFields('rec', this.value)">
                             <option value="REGULAR_CUSTOMER">Regular Customer</option>
+                            <option value="REGULAR_COMPANY">Regular Company</option>
                             <option value="EXPORT">Export</option>
                             <option value="AUCTION">Auction</option>
                         </select>
@@ -374,6 +397,24 @@
                             <input type="email" name="email" id="recEmail" class="form-control" placeholder="customer@email.com">
                             <span class="field-error" id="err-rec-email"></span>
                         </div>
+                    </div>
+                </div>
+
+                <div id="rec-company-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Company Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyName" id="recCompanyNameCompany" class="form-control" placeholder="Yomiru Motors" minlength="2" maxlength="100">
+                        <span class="field-error" id="err-rec-company-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Company Address <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyAddress" id="recCompanyAddress" class="form-control" placeholder="Colombo 07" maxlength="200">
+                        <span class="field-error" id="err-rec-company-address"></span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
+                        <input type="tel" name="companyContactNumber" id="recCompanyContact" class="form-control" placeholder="07XXXXXXXX">
+                        <span class="field-error" id="err-rec-company-contact"></span>
                     </div>
                 </div>
 
@@ -440,6 +481,7 @@
                         <label class="form-label">Buyer Type</label>
                         <select name="buyerType" id="editBuyerType" class="form-control" required onchange="toggleBuyerFields('edit', this.value)">
                             <option value="REGULAR_CUSTOMER">Regular Customer</option>
+                            <option value="REGULAR_COMPANY">Regular Company</option>
                             <option value="EXPORT">Export</option>
                             <option value="AUCTION">Auction</option>
                         </select>
@@ -471,6 +513,24 @@
                             <input type="email" name="email" id="editEmail" class="form-control" placeholder="customer@email.com">
                             <span class="field-error" id="err-edit-email"></span>
                         </div>
+                    </div>
+                </div>
+
+                <div id="edit-company-fields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Company Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyName" id="editCompanyNameCompany" class="form-control" maxlength="100">
+                        <span class="field-error" id="err-edit-company-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Company Address <span style="color:var(--danger)">*</span></label>
+                        <input type="text" name="companyAddress" id="editCompanyAddress" class="form-control" maxlength="200">
+                        <span class="field-error" id="err-edit-company-address"></span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Contact Number <span style="color:var(--danger)">*</span></label>
+                        <input type="tel" name="companyContactNumber" id="editCompanyContact" class="form-control" placeholder="07XXXXXXXX">
+                        <span class="field-error" id="err-edit-company-contact"></span>
                     </div>
                 </div>
 
@@ -550,12 +610,13 @@
 
     <script>
         function toggleBuyerFields(prefix, type) {
-            const sections = ['regular', 'export', 'auction'];
+            const sections = ['regular', 'company', 'export', 'auction'];
             sections.forEach(section => {
                 const container = document.getElementById(prefix + '-' + section + '-fields');
                 if (!container) return;
                 const active =
                     (section === 'regular' && type === 'REGULAR_CUSTOMER') ||
+                    (section === 'company' && type === 'REGULAR_COMPANY') ||
                     (section === 'export' && type === 'EXPORT') ||
                     (section === 'auction' && type === 'AUCTION');
                 container.style.display = active ? 'block' : 'none';
@@ -617,6 +678,24 @@
                 }
             }
 
+            if (buyer === 'REGULAR_COMPANY') {
+                const company = document.getElementById(prefix === 'rec' ? 'recCompanyNameCompany' : 'editCompanyNameCompany').value.trim();
+                const address = document.getElementById(prefix === 'rec' ? 'recCompanyAddress' : 'editCompanyAddress').value.trim();
+                const phone = document.getElementById(prefix === 'rec' ? 'recCompanyContact' : 'editCompanyContact').value.trim();
+                if (company.length < 2) {
+                    setError('err-' + prefix + '-company-name', 'Company name is required');
+                    valid = false;
+                }
+                if (address.length < 2) {
+                    setError('err-' + prefix + '-company-address', 'Company address is required');
+                    valid = false;
+                }
+                if (!isValidPhone(phone)) {
+                    setError('err-' + prefix + '-company-contact', 'Use 07XXXXXXXX or +947XXXXXXXX');
+                    valid = false;
+                }
+            }
+
             if (buyer === 'EXPORT') {
                 const company = document.getElementById(prefix === 'rec' ? 'recCompanyName' : 'editCompanyName').value.trim();
                 const country = document.getElementById(prefix === 'rec' ? 'recExportCountry' : 'editExportCountry').value.trim();
@@ -672,7 +751,10 @@
             document.getElementById('editContactNumber').value = btn.dataset.contact || '';
             document.getElementById('editEmail').value = buyer === 'REGULAR_CUSTOMER' ? (btn.dataset.email || '') : '';
 
+            document.getElementById('editCompanyNameCompany').value = btn.dataset.company || '';
             document.getElementById('editCompanyName').value = btn.dataset.company || '';
+            document.getElementById('editCompanyAddress').value = btn.dataset.companyAddress || '';
+            document.getElementById('editCompanyContact').value = btn.dataset.companyContact || '';
             document.getElementById('editExportCountry').value = btn.dataset.country || '';
             document.getElementById('editExportEmail').value = buyer === 'EXPORT' ? (btn.dataset.email || '') : '';
 

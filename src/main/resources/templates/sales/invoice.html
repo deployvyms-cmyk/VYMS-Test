@@ -133,9 +133,16 @@
             <div class="invoice-grid">
                 <div class="invoice-section">
                     <h4>Bill To</h4>
-                    <p style="font-weight:600; font-size:15px;" th:text="${sale.customerName}">Customer</p>
-                    <p th:text="${sale.contactNumber}">Contact</p>
-                    <p th:text="${sale.email}">Email</p>
+                    <div th:if="${sale.buyerType != null and sale.buyerType.name() == 'REGULAR_COMPANY'}">
+                        <p style="font-weight:600; font-size:15px;" th:text="${sale.companyName}">Company</p>
+                        <p th:text="${sale.companyContactNumber}">Contact</p>
+                        <p th:text="${sale.companyAddress}">Address</p>
+                    </div>
+                    <div th:if="${sale.buyerType == null or sale.buyerType.name() != 'REGULAR_COMPANY'}">
+                        <p style="font-weight:600; font-size:15px;" th:text="${sale.customerName}">Customer</p>
+                        <p th:text="${sale.contactNumber}">Contact</p>
+                        <p th:text="${sale.email}">Email</p>
+                    </div>
                 </div>
             </div>
 
