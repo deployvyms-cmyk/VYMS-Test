@@ -15,8 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -122,6 +126,23 @@ public class UserController {
         // Chart 2: Pipeline
         model.addAttribute("countDraft", countDraft);
         model.addAttribute("countFinalized", countFinalized);
+
+        // Recent Sales (latest 8)
+        List<Sale> recentSales = sales.stream()
+                .sorted(Comparator.comparing(Sale::getSaleDate, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(8)
+                .collect(Collectors.toList());
+        model.addAttribute("recentSales", recentSales);
+
+        // Total Users
+        model.addAttribute("totalUsers", (long) userService.findAll().size());
+
+        // Brand Stock Share
+        Map<String, Long> brandCounts = vehicles.stream()
+                .filter(v -> v.getMake() != null && !v.getMake().isBlank())
+                .collect(Collectors.groupingBy(Vehicle::getMake, Collectors.counting()));
+        model.addAttribute("brandLabels", new ArrayList<>(brandCounts.keySet()));
+        model.addAttribute("brandData", new ArrayList<>(brandCounts.values()));
 
         return "admin";
     }

@@ -1,6 +1,6 @@
 /* ==========================================================================
    VYMS Premium Design System - Admin Space
-   Harmonious Indigo/Slate Palette with Modern Glassmorphism & High-End Micro-Interactions
+   Harmonious Indigo/Purple Palette with Modern Glassmorphism & High-End Micro-Interactions
    ========================================================================== */
 
 /* 1. Theme Configuration & Design Tokens */
@@ -251,7 +251,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 36px;
+  margin-bottom: 24px;
 }
 
 .page-title h1 {
@@ -297,12 +297,77 @@ body {
   color: var(--primary-light);
 }
 
-/* 5. Primary Stat Cards (High-End Metrics Grid) */
+/* 5. Minimalist Quick Stats Capsule Row */
+.quick-stats-strip {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.08);
+  padding: 14px 32px;
+  border-radius: 9999px;
+  margin-bottom: 36px;
+  width: fit-content;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.01), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.stat-inline-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-inline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.dot-finalized { background-color: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+.dot-draft { background-color: #94a3b8; box-shadow: 0 0 10px rgba(148, 163, 184, 0.6); }
+.dot-fleet { background-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.6); }
+.dot-users { background-color: var(--purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.6); }
+
+.stat-inline-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.stat-inline-value {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.stat-inline-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.text-emerald { color: var(--success); }
+.text-slate { color: #64748b; }
+.text-indigo { color: var(--primary); }
+.text-purple { color: var(--purple); }
+
+/* 6. Primary Stat Cards (High-End Metrics Grid) */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 36px;
+}
+
+.metrics-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .metrics-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .metric-card {
@@ -336,7 +401,10 @@ body {
 }
 
 /* Glow indicators based on card hover class */
-.metric-card:hover::after { background: linear-gradient(90deg, transparent, var(--primary-light), transparent); }
+.card-blue:hover::after { background: linear-gradient(90deg, transparent, var(--info), transparent); }
+.card-green:hover::after { background: linear-gradient(90deg, transparent, var(--success), transparent); }
+.card-purple:hover::after { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+.card-emerald:hover::after { background: linear-gradient(90deg, transparent, #10b981, transparent); }
 
 .metric-info h3 {
   color: var(--text-muted);
@@ -391,12 +459,43 @@ body {
 .icon-orange { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
 .icon-red { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
 
-/* 6. Charts Grid */
+/* 7. Split Dashboard Layout */
+.dashboard-split-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-pane-left {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dashboard-pane-right {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Charts Grid */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  margin-bottom: 36px;
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-card {
@@ -435,12 +534,138 @@ body {
 }
 
 .chart-container {
-  height: 300px;
+  height: 280px;
   position: relative;
   width: 100%;
 }
 
-/* 7. Premium Tables and Card Lists */
+/* 8. Recent Sales Feed (Beautiful Compact Activity Logs) */
+.activity-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  height: fit-content;
+}
+
+.activity-card-header {
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.05);
+  padding-bottom: 12px;
+}
+
+.activity-card-header h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-card-header h3 i {
+  color: var(--primary);
+}
+
+.activity-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activity-item-compact:hover {
+  background: #ffffff;
+  border-color: rgba(99, 102, 241, 0.25);
+  transform: translateX(4px) translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.activity-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.06));
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.activity-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.activity-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.activity-item-row h4 {
+  font-size: 14px;
+  font-weight: 750;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+
+.activity-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.activity-meta strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+.activity-dot {
+  color: #cbd5e1;
+}
+
+.activity-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.activity-empty i {
+  font-size: 36px;
+  margin-bottom: 12px;
+  color: #cbd5e1;
+  display: block;
+}
+
+/* 9. Premium Tables and Card Lists */
 .table-card {
   background: var(--bg-card);
   border-radius: 20px;
@@ -520,7 +745,7 @@ tr:last-child td {
 .badge-inventory { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
 .badge-mechanic { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
 
-/* 8. Activity feed list */
+/* 10. Activity feed list (legacy) */
 .activity-feed {
   padding: 26px;
   background: var(--bg-card);
@@ -572,7 +797,7 @@ tr:last-child td {
   font-weight: 500;
 }
 
-/* 9. Buttons, Tabs & Modals */
+/* 11. Buttons, Tabs & Modals */
 .btn {
   display: inline-flex;
   align-items: center;

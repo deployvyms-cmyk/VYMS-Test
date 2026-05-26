@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard - VYMS</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -67,92 +67,156 @@
             </div>
         </div>
 
-        <!-- High-level metrics -->
-        <div class="metrics-grid">
+        <!-- High-level Metrics Grid -->
+        <div class="metrics-grid metrics-grid-4">
             <div class="metric-card card-blue">
                 <div class="metric-info">
                     <h3>Total Vehicles</h3>
                     <div class="metric-value" th:text="${totalVehicles}">0</div>
                     <div class="metric-trend"><i class="fas fa-circle"></i> Active Yard Inventory</div>
                 </div>
-                <div class="metric-icon icon-blue">
-                    <i class="fas fa-car"></i>
-                </div>
+                <div class="metric-icon icon-blue"><i class="fas fa-car"></i></div>
             </div>
-
             <div class="metric-card card-green">
                 <div class="metric-info">
                     <h3>Total Sales</h3>
                     <div class="metric-value" th:text="${totalSales}">0</div>
                     <div class="metric-trend"><i class="fas fa-arrow-trend-up"></i> Completed Orders</div>
                 </div>
-                <div class="metric-icon icon-green">
-                    <i class="fas fa-chart-line"></i>
-                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-chart-line"></i></div>
             </div>
-
             <div class="metric-card card-purple">
                 <div class="metric-info">
                     <h3>Total Revenue</h3>
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">¥0</div>
                     <div class="metric-trend"><i class="fas fa-wallet"></i> Gross Remittances</div>
                 </div>
-                <div class="metric-icon icon-purple">
-                    <i class="fas fa-yen-sign"></i>
-                </div>
+                <div class="metric-icon icon-purple"><i class="fas fa-yen-sign"></i></div>
             </div>
-
             <div class="metric-card card-emerald">
                 <div class="metric-info">
                     <h3>Total Profit</h3>
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalProfit, 1, 0)}">¥0</div>
                     <div class="metric-trend"><i class="fas fa-piggy-bank"></i> Net Earnings</div>
                 </div>
-                <div class="metric-icon icon-green">
-                    <i class="fas fa-yen-sign"></i>
-                </div>
+                <div class="metric-icon icon-green"><i class="fas fa-yen-sign"></i></div>
             </div>
         </div>
 
-        <!-- Charts and recent activity -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i class="fas fa-pie-chart text-indigo"></i> Overall Financials (Revenue vs Costs)</div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="financialsChart"></canvas>
+        <!-- Elegant Typographic Quick Stats Strip -->
+        <div class="quick-stats-strip">
+            <div class="stat-inline-item">
+                <span class="stat-inline-dot dot-finalized"></span>
+                <span class="stat-inline-label">Finalized Sales:</span>
+                <span class="stat-inline-value text-emerald" th:text="${countFinalized != null ? countFinalized : 0}">3</span>
+            </div>
+            <div class="stat-inline-divider"></div>
+            <div class="stat-inline-item">
+                <span class="stat-inline-dot dot-draft"></span>
+                <span class="stat-inline-label">Draft Orders:</span>
+                <span class="stat-inline-value text-slate" th:text="${countDraft != null ? countDraft : 0}">1</span>
+            </div>
+            <div class="stat-inline-divider"></div>
+            <div class="stat-inline-item">
+                <span class="stat-inline-dot dot-fleet"></span>
+                <span class="stat-inline-label">Total Yard Fleet:</span>
+                <span class="stat-inline-value text-indigo" th:text="${totalVehicles != null ? totalVehicles : 0}">0</span>
+            </div>
+            <div class="stat-inline-divider"></div>
+            <div class="stat-inline-item">
+                <span class="stat-inline-dot dot-users"></span>
+                <span class="stat-inline-label">System Users:</span>
+                <span class="stat-inline-value text-purple" th:text="${totalUsers != null ? totalUsers : 0}">0</span>
+            </div>
+        </div>
+
+        <!-- Split Grid Layout -->
+        <div class="dashboard-split-grid">
+            <!-- Left Side: Analytics & Charts -->
+            <div class="dashboard-pane-left">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fas fa-chart-pie text-indigo"></i> Overall Financials</div>
+                        </div>
+                        <div class="chart-container"><canvas id="financialsChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fas fa-chart-bar text-indigo"></i> Sales Pipeline</div>
+                        </div>
+                        <div class="chart-container"><canvas id="pipelineChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fas fa-chart-pie text-indigo"></i> Brand Stock Share</div>
+                        </div>
+                        <div class="chart-container"><canvas id="brandChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title"><i class="fas fa-chart-area text-indigo"></i> Cost Breakdown</div>
+                        </div>
+                        <div class="chart-container"><canvas id="costChart"></canvas></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title"><i class="fas fa-bar-chart text-indigo"></i> Sales Pipeline Output</div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="pipelineChart"></canvas>
+            <!-- Right Side: Recent Sales Feed -->
+            <div class="dashboard-pane-right">
+                <div class="activity-card">
+                    <div class="activity-card-header">
+                        <h3><i class="fas fa-history text-indigo"></i> Recent Sales Transactions</h3>
+                    </div>
+                    <div class="activity-feed-list">
+                        <div th:if="${recentSales == null or recentSales.isEmpty()}" class="activity-empty">
+                            <i class="fas fa-receipt"></i>
+                            <p>No sales transactions logged yet.</p>
+                        </div>
+                        <div th:each="sale : ${recentSales}" class="activity-item-compact"
+                             th:with="bName=${sale.buyerType != null ? 
+                                             (sale.buyerType.name() == 'REGULAR_CUSTOMER' ? (sale.customerName != null ? sale.customerName : 'Guest') : 
+                                             (sale.buyerType.name() == 'REGULAR_COMPANY' or sale.buyerType.name() == 'EXPORT' ? (sale.companyName != null ? sale.companyName : 'Company') : 
+                                             (sale.auctionHouseName != null ? sale.auctionHouseName : 'Auction'))) : 
+                                             (sale.customerName != null ? sale.customerName : 'Guest')}">
+                            <div class="activity-avatar" th:text="${#strings.length(bName) >= 2 ? #strings.substring(bName, 0, 2).toUpperCase() : #strings.toUpperCase(bName)}">CU</div>
+                            <div class="activity-info">
+                                <div class="activity-item-row">
+                                    <h4 th:text="${sale.vehicle != null ? 
+                                                   (sale.vehicle.vehicleModel != null && !sale.vehicle.vehicleModel.isEmpty() ? sale.vehicle.vehicleModel : 
+                                                    ((sale.vehicle.year != null ? sale.vehicle.year + ' ' : '') + 
+                                                     (sale.vehicle.make != null ? sale.vehicle.make + ' ' : '') + 
+                                                     (sale.vehicle.model != null ? sale.vehicle.model : '')).trim()) : 
+                                                   'Vehicle'}">2020 Honda Fit</h4>
+                                    <span class="activity-price" th:text="'¥' + ${#numbers.formatDecimal(sale.salePrice, 1, 0)}">¥850,000</span>
+                                </div>
+                                <div class="activity-meta">
+                                    <span>To: <strong th:text="${bName}">Customer Name</strong></span>
+                                    <span class="activity-dot">•</span>
+                                    <span th:text="${sale.saleDate}">2026-05-20</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- Date Script -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
-        });
-    </script>
-
     <!-- Scripts for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
+            // Live date rendering
+            const dateOpts = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', dateOpts);
+
             const rev = /*[[${chartTotalRevenue != null ? chartTotalRevenue : 0}]]*/ 0;
             const pur = /*[[${chartTotalPurchase != null ? chartTotalPurchase : 0}]]*/ 0;
             const rep = /*[[${chartTotalRepair != null ? chartTotalRepair : 0}]]*/ 0;
-            
+
+            // Chart 1: Financials Doughnut
             new Chart(document.getElementById('financialsChart'), {
                 type: 'doughnut',
                 data: {
@@ -166,10 +230,17 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    cutout: '65%'
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { size: 11 } }
+                        }
+                    }
                 }
             });
 
+            // Chart 2: Sales Pipeline Bar
             const draft = /*[[${countDraft != null ? countDraft : 0}]]*/ 0;
             const finalized = /*[[${countFinalized != null ? countFinalized : 0}]]*/ 0;
 
@@ -180,7 +251,7 @@
                     datasets: [{
                         label: 'Count',
                         data: [draft, finalized],
-                        backgroundColor: ['#9ca3af', '#8b5cf6'],
+                        backgroundColor: ['#94a3b8', '#8b5cf6'],
                         borderWidth: 0,
                         borderRadius: 8,
                         barThickness: 42
@@ -189,20 +260,65 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            grid: { display: false }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0,
-                                stepSize: 1
-                            }
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 }, grid: { color: 'rgba(226, 232, 240, 0.5)' } }
+                    }
+                }
+            });
+
+            // Chart 3: Brand Stock Doughnut
+            const brandLabels = /*[[${brandLabels}]]*/ [];
+            const brandData = /*[[${brandData}]]*/ [];
+
+            new Chart(document.getElementById('brandChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: brandLabels.length ? brandLabels : ['No Stock'],
+                    datasets: [{
+                        data: brandData.length ? brandData : [1],
+                        backgroundColor: [
+                            '#6366f1', '#0ea5e9', '#8b5cf6', '#ea580c',
+                            '#10b981', '#fbbf24', '#f87171', '#a78bfa'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { size: 11 } }
                         }
+                    }
+                }
+            });
+
+            // Chart 4: Cost Breakdown Horizontal Bar
+            new Chart(document.getElementById('costChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Purchase Cost', 'Repair Cost'],
+                    datasets: [{
+                        data: [rev, pur, rep],
+                        backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        barThickness: 32
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.5)' } },
+                        y: { grid: { display: false } }
                     }
                 }
             });
