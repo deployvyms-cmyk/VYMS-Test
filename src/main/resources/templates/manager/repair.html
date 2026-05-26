@@ -103,7 +103,7 @@
                     <h3>Total Cost</h3>
                     <div class="metric-value" th:text="${'¥' + #numbers.formatDecimal(totalRepairCost, 1, 0)}">¥0</div>
                 </div>
-                <div class="metric-icon icon-red"><i class="fas fa-dollar-sign"></i></div>
+                <div class="metric-icon icon-red"><i class="fas fa-yen-sign"></i></div>
             </div>
         </div>
 
@@ -281,6 +281,7 @@
             }
         });
     </script>
+    <script src="/js/language-switcher.js"></script>
 </body>
 
 </html>

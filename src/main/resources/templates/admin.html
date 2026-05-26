@@ -92,7 +92,7 @@
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalRevenue, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-purple">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-yen-sign"></i>
                 </div>
             </div>
 
@@ -102,7 +102,7 @@
                     <div class="metric-value" th:text="'¥' + ${#numbers.formatDecimal(totalProfit, 1, 0)}">¥0</div>
                 </div>
                 <div class="metric-icon icon-green">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-yen-sign"></i>
                 </div>
             </div>
         </div>
@@ -193,6 +193,7 @@
             });
         });
     </script>
+    <script src="/js/language-switcher.js"></script>
 </body>
 
 </html>
