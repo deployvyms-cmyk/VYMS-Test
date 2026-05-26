@@ -23,7 +23,7 @@ public class InvoiceEmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Value("${spring.mail.username:}")
+    @Value("${app.mail.from:}")
     private String mailFrom;
 
     public InvoiceEmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
