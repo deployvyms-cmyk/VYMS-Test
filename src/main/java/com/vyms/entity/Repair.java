@@ -3,6 +3,7 @@ package com.vyms.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "repair")
@@ -24,6 +25,10 @@ public class Repair {
 
     // PENDING or INSPECTED
     private String status;
+
+    // Soft-delete metadata for admin visibility
+    private LocalDateTime deletedAt;
+    private String deletedBy;
 
     // Getters and Setters
     public Long getId() {
@@ -80,5 +85,21 @@ public class Repair {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
     }
 }

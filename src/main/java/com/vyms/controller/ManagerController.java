@@ -42,6 +42,7 @@ public class ManagerController {
     private final InventoryAnalyticsService inventoryAnalyticsService;
     private final InvoiceEmailService invoiceEmailService;
     private final UploadedFileRepository uploadedFileRepository;
+    private final SystemLogService systemLogService;
 
     @Value("${app.upload-dir}")
     private String uploadDir;
@@ -54,7 +55,8 @@ public class ManagerController {
             PdfReportService pdfReportService,
             InventoryAnalyticsService inventoryAnalyticsService,
             InvoiceEmailService invoiceEmailService,
-            UploadedFileRepository uploadedFileRepository) {
+            UploadedFileRepository uploadedFileRepository,
+            SystemLogService systemLogService) {
         this.userService = userService;
         this.vehicleService = vehicleService;
         this.saleService = saleService;
@@ -63,6 +65,7 @@ public class ManagerController {
         this.inventoryAnalyticsService = inventoryAnalyticsService;
         this.invoiceEmailService = invoiceEmailService;
         this.uploadedFileRepository = uploadedFileRepository;
+        this.systemLogService = systemLogService;
     }
 
     private String normalize(String value) {
@@ -491,7 +494,7 @@ public class ManagerController {
     // =========================================================================
     @GetMapping("/repair")
     public String repair(Model model, @RequestParam(name = "vehicleId", required = false) Long vehicleId) {
-        List<Repair> repairs = repairService.findAll();
+        List<Repair> repairs = repairService.findActive();
         List<Vehicle> vehicles = vehicleService.findAll().stream()
                 .filter(v -> !"SOLD".equalsIgnoreCase(v.getStatus()))
                 .collect(Collectors.toList());
@@ -552,6 +555,10 @@ public class ManagerController {
     public String markInspected(@PathVariable("id") Long id, RedirectAttributes ra) {
         Optional<Repair> repOpt = repairService.findById(id);
         repOpt.ifPresent(r -> {
+            if (r.getDeletedAt() != null) {
+                ra.addFlashAttribute("errorMsg", "This repair record was deleted.");
+                return;
+            }
             if (r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus())) {
                 ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
                 return;
@@ -569,7 +576,23 @@ public class ManagerController {
             @RequestParam("repairType") String repairType,
             @RequestParam("status") String status,
             RedirectAttributes ra) {
-        return doEditRepair(id, description, cost, repairType, status, ra);
+        Optional<Repair> repOpt = repairService.findById(id);
+        repOpt.ifPresent(r -> {
+            if (r.getDeletedAt() != null) {
+                ra.addFlashAttribute("errorMsg", "This repair record was deleted.");
+                return;
+            }
+            if (r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus())) {
+                ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
+                return;
+            }
+            r.setDescription(description);
+            r.setCost(cost);
+            r.setRepairType(repairType);
+            r.setStatus(status);
+            repairService.save(r);
+        });
+        return "redirect:/manager/repair";
     }
 
     /** Fixed-URL variant used by the Edit modal (no path variable needed). */
@@ -588,6 +611,10 @@ public class ManagerController {
             String repairType, String status, RedirectAttributes ra) {
         Optional<Repair> repOpt = repairService.findById(id);
         repOpt.ifPresent(r -> {
+            if (r.getDeletedAt() != null) {
+                ra.addFlashAttribute("errorMsg", "This repair record was deleted.");
+                return;
+            }
             if (r.getVehicle() != null && "SOLD".equalsIgnoreCase(r.getVehicle().getStatus())) {
                 ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
                 return;
@@ -613,7 +640,7 @@ public class ManagerController {
 
     @GetMapping("/repair/download")
     public ResponseEntity<byte[]> downloadRepairReport() {
-        List<Repair> repairs = repairService.findAll();
+        List<Repair> repairs = repairService.findActive();
         byte[] pdf = pdfReportService.repairReport(repairs);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"repair-report.pdf\"")
@@ -628,7 +655,7 @@ public class ManagerController {
     public String reports(Model model) {
         List<Sale> sales = saleService.findAll();
         List<Vehicle> vehicles = vehicleService.findAll();
-        List<Repair> repairs = repairService.findAll();
+        List<Repair> repairs = repairService.findActive();
 
         BigDecimal totalRevenue = sales.stream()
                 .map(s -> s.getSalePrice() != null ? s.getSalePrice() : BigDecimal.ZERO)
@@ -1018,7 +1045,7 @@ public class ManagerController {
     public ResponseEntity<byte[]> downloadFullBusinessReport() {
         List<Sale> sales = saleService.findAll();
         List<Vehicle> vehicles = vehicleService.findAll();
-        List<Repair> repairs = repairService.findAll();
+        List<Repair> repairs = repairService.findActive();
         byte[] pdf = pdfReportService.fullBusinessReport(sales, vehicles, repairs);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"business-report.pdf\"")
@@ -1044,4 +1071,55 @@ public class ManagerController {
     // Download: Attendance Report PDF
     // =========================================================================
     // Attendance download endpoint removed for deployment.
+
+    @PostMapping("/repair/delete/{id}")
+    public String deleteRepair(@PathVariable("id") Long id,
+            jakarta.servlet.http.HttpSession session,
+            RedirectAttributes ra) {
+        Optional<Repair> repOpt = repairService.findById(id);
+        if (repOpt.isEmpty()) {
+            ra.addFlashAttribute("errorMsg", "Repair record not found.");
+            return "redirect:/manager/repair";
+        }
+
+        Repair repair = repOpt.get();
+        if (repair.getDeletedAt() != null) {
+            ra.addFlashAttribute("errorMsg", "This repair record was already deleted.");
+            return "redirect:/manager/repair";
+        }
+        if (repair.getVehicle() != null && "SOLD".equalsIgnoreCase(repair.getVehicle().getStatus())) {
+            ra.addFlashAttribute("errorMsg", "Sold vehicle repairs are locked.");
+            return "redirect:/manager/repair";
+        }
+
+        String username = Optional.ofNullable(session.getAttribute("currentUserName"))
+                .map(Object::toString)
+                .filter(name -> !name.isBlank())
+                .orElse("Unknown");
+
+        repairService.softDelete(repair, username);
+
+        Vehicle vehicle = repair.getVehicle();
+        if (vehicle != null) {
+            BigDecimal cost = repair.getCost() != null ? repair.getCost() : BigDecimal.ZERO;
+            BigDecimal current = vehicle.getRepairCost() != null ? vehicle.getRepairCost() : BigDecimal.ZERO;
+            BigDecimal updated = current.subtract(cost);
+            if (updated.compareTo(BigDecimal.ZERO) < 0) {
+                updated = BigDecimal.ZERO;
+            }
+            vehicle.setRepairCost(updated);
+            vehicleService.save(vehicle);
+        }
+
+        String vehicleLabel = repair.getVehicle() != null && repair.getVehicle().getVehicleModel() != null
+                ? repair.getVehicle().getVehicleModel()
+                : "Unknown vehicle";
+        systemLogService.createLog(
+                "REPAIR_DELETED",
+                "Repair record " + repair.getId() + " deleted for " + vehicleLabel,
+                username,
+                "SUCCESS");
+        ra.addFlashAttribute("successMsg", "Repair record deleted.");
+        return "redirect:/manager/repair";
+    }
 }

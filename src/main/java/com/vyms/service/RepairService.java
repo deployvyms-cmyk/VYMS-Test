@@ -31,6 +31,14 @@ public class RepairService {
         return repairRepository.findAll();
     }
 
+    public List<Repair> findActive() {
+        return repairRepository.findAllByDeletedAtIsNull();
+    }
+
+    public List<Repair> findDeleted() {
+        return repairRepository.findAllByDeletedAtIsNotNull();
+    }
+
     /**
      * Returns one repair by id when present.
      */
@@ -50,6 +58,12 @@ public class RepairService {
      */
     public void deleteById(Long id) {
         repairRepository.deleteById(id);
+    }
+
+    public Repair softDelete(Repair repair, String deletedBy) {
+        repair.setDeletedAt(java.time.LocalDateTime.now());
+        repair.setDeletedBy(deletedBy);
+        return repairRepository.save(repair);
     }
 
     public boolean existsByVehicleId(Long vehicleId) {

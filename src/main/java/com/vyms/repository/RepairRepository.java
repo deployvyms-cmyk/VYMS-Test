@@ -4,6 +4,8 @@ import com.vyms.entity.Repair;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Repository for repair entities.
  *
@@ -13,4 +15,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RepairRepository extends JpaRepository<Repair, Long> {
 	boolean existsByVehicle_Id(Long vehicleId);
+
+	List<Repair> findAllByDeletedAtIsNull();
+
+	List<Repair> findAllByDeletedAtIsNotNull();
 }
