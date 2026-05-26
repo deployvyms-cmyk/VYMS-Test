@@ -30,6 +30,7 @@ CREATE TABLE vehicle (
     sale_price     DECIMAL(19, 2),
     status         VARCHAR(50),       -- UNSOLD | SOLD
     image_path     VARCHAR(255),
+    important_note VARCHAR(1000),
     make           VARCHAR(255),
     model          VARCHAR(255),
     year           INTEGER,

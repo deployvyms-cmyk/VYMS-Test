@@ -261,6 +261,31 @@
             font-size: 13px;
             color: var(--text-muted, #64748b);
         }
+
+        .vehicle-note {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px dashed var(--border, #e2e8f0);
+            background: #f8fafc;
+            font-size: 13px;
+            color: var(--text-main, #0f172a);
+        }
+
+        .vehicle-note-title {
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--text-muted, #64748b);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vehicle-card.note-open .vehicle-note {
+            display: block;
+        }
     </style>
 </head>
 
@@ -375,6 +400,10 @@
                     <div class="detail-row price" th:if="${vehicle.salePrice != null}">
                         Finalized Sale Price <span><th:block th:text="${'¥' + #numbers.formatDecimal(vehicle.salePrice, 1, 0)}"></th:block></span>
                     </div>
+                    <div class="vehicle-note" th:if="${vehicle.importantNote != null and !vehicle.importantNote.isEmpty()}">
+                        <div class="vehicle-note-title"><i class="fas fa-note-sticky"></i> Important Note</div>
+                        <div th:text="${vehicle.importantNote}">Important note</div>
+                    </div>
                     <div class="vehicle-actions">
                         <a th:href="@{/manager/inventory/edit/{id}(id=${vehicle.id})}" class="btn btn-outline btn-sm"
                             style="text-decoration:none; flex-grow:1; text-align:center; justify-content:center;">
@@ -472,6 +501,16 @@
                             </div>
                         </div>
                         <input type="file" name="imageFile" id="add-imageFile" accept="image/*" style="display:none;" onchange="previewAddImage(event)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-outline" id="importantNoteToggle" onclick="toggleImportantNote()">
+                        <i class="fas fa-note-sticky"></i> Important Note
+                    </button>
+                    <div id="importantNoteWrap" style="display:none; margin-top:12px;">
+                        <label class="form-label">Important Note (Optional)</label>
+                        <textarea name="importantNote" id="importantNote" class="form-control" rows="3"
+                            placeholder="Add any special details for this vehicle..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -669,6 +708,9 @@
             brandConfirmed = '';
             document.getElementById('modelInput').value = '';
             document.getElementById('vehicleModelHidden').value = '';
+            document.getElementById('importantNote').value = '';
+            document.getElementById('importantNoteWrap').style.display = 'none';
+            document.getElementById('importantNoteToggle').innerHTML = '<i class="fas fa-note-sticky"></i> Important Note';
         }
         function closeAddModal() {
             document.getElementById('addModal').classList.remove('active');
@@ -706,6 +748,16 @@
             document.getElementById('imagePreviewContainer').style.display = 'none';
             document.getElementById('addImagePreview').src = '';
             document.getElementById('uploadFileName').textContent = '';
+        }
+
+        function toggleImportantNote() {
+            const wrap = document.getElementById('importantNoteWrap');
+            const button = document.getElementById('importantNoteToggle');
+            const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+            wrap.style.display = isHidden ? 'block' : 'none';
+            button.innerHTML = isHidden
+                ? '<i class="fas fa-note-sticky"></i> Hide Important Note'
+                : '<i class="fas fa-note-sticky"></i> Important Note';
         }
 
         document.querySelector('#addModal form').addEventListener('submit', function (e) {
@@ -753,6 +805,16 @@
                 card.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
             });
         }
+
+        document.querySelectorAll('#vehiclesGrid .vehicle-card').forEach(card => {
+            const note = card.querySelector('.vehicle-note');
+            if (!note) return;
+
+            card.addEventListener('click', event => {
+                if (event.target.closest('.vehicle-actions')) return;
+                card.classList.toggle('note-open');
+            });
+        });
     </script>
 </body>
 

@@ -35,6 +35,9 @@ public class Vehicle {
 
     private LocalDate addedDate;
 
+    @Column(length = 1000)
+    private String importantNote;
+
     // --- legacy fields kept for compatibility ---
     private String make;
     private String model;
@@ -141,6 +144,14 @@ public class Vehicle {
 
     public void setAddedDate(LocalDate addedDate) {
         this.addedDate = addedDate;
+    }
+
+    public String getImportantNote() {
+        return importantNote;
+    }
+
+    public void setImportantNote(String importantNote) {
+        this.importantNote = importantNote;
     }
 
     public String getMake() {

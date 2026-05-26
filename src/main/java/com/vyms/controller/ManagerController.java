@@ -250,6 +250,7 @@ public class ManagerController {
             @RequestParam(name = "purchasePrice", required = false) BigDecimal purchasePrice,
             @RequestParam(name = "buyerName") String buyerName,
             @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
+            @RequestParam(name = "importantNote", required = false) String importantNote,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             RedirectAttributes ra) throws IOException {
 
@@ -298,6 +299,7 @@ public class ManagerController {
         v.setRepairCost(BigDecimal.ZERO);
         v.setStatus("UNSOLD");
         v.setAddedDate(LocalDate.now());
+        v.setImportantNote(hasText(importantNote) ? importantNote.trim() : null);
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imagePath = saveImage(imageFile);
