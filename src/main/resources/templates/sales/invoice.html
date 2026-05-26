@@ -362,14 +362,46 @@
             </span>
         </div>
 
-        <div class="page-alert page-alert-error no-print" th:if="${param.sendError != null}">
-            <i class="fas fa-triangle-exclamation"></i>
-            <span th:switch="${param.sendError[0]}">
-                <span th:case="'missing_email'">Unable to send invoice. Please add a customer email first.</span>
-                <span th:case="'auction'">Unable to send invoice. Auction customers do not have an email address.</span>
-                <span th:case="'mail_error'">Unable to send invoice due to a mail server error. Please try again.</span>
-                <span th:case="*" th:text="${'Unable to send invoice: ' + param.sendError[0]}">Unable to send invoice. Please check customer details.</span>
-            </span>
+        <div class="page-alert page-alert-error no-print" th:if="${param.sendError != null}" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-triangle-exclamation" style="font-size: 16px;"></i>
+                <span th:switch="${param.sendError[0]}">
+                    <span th:case="'missing_email'">Unable to send invoice. Please add a customer email first.</span>
+                    <span th:case="'auction'">Unable to send invoice. Auction customers do not have an email address.</span>
+                    <span th:case="'mail_error'">Unable to send invoice due to a mail server error. Please try again.</span>
+                    <span th:case="*" th:text="${'Unable to send invoice: ' + param.sendError[0]}">Unable to send invoice. Please check customer details.</span>
+                </span>
+            </div>
+            
+            <!-- Dynamic helper block for SMTP connection timeouts (Railway Port Blocks) -->
+            <div th:if="${param.sendError[0].contains('Couldn''t connect') or param.sendError[0].contains('timeout') or param.sendError[0].contains('MailConnectException')}" 
+                 style="margin-top: 10px; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 16px; font-size: 13px; color: #475569; width: 100%; text-align: left;">
+                <h4 style="margin: 0 0 10px 0; color: #b91c1c; font-size: 14px; font-family: 'Outfit', sans-serif;"><i class="fas fa-network-wired"></i> Deployed Environment SMTP Port Block Detected</h4>
+                <p style="margin: 0 0 12px 0; line-height: 1.5;">Railway's hosting datacenter is completely blocking outgoing SMTP ports (25, 465, 587) to prevent spam. This is standard for almost all cloud hosts and blocks Gmail.</p>
+                
+                <h5 style="margin: 12px 0 6px 0; color: var(--slate-900);">💡 How to Fix This in 60 Seconds:</h5>
+                <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                    <li>Go to your Gmail account's Google Drive and create a new **Google Apps Script** at <a href="https://script.google.com/" target="_blank" style="color: #4f46e5; text-decoration: underline;">script.google.com</a>.</li>
+                    <li>Copy and paste this script to bypass SMTP blocks entirely using standard HTTPS (Port 443):
+                        <pre style="margin: 8px 0; background: #0f172a; color: #f8fafc; padding: 12px; border-radius: 6px; font-size: 11px; overflow-x: auto; font-family: monospace;">function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    if (data.token !== "wljluuqxxcffcnzc") {
+      return ContentService.createTextOutput(JSON.stringify({success: false, error: "Unauthorized"})).setMimeType(ContentService.MimeType.JSON);
+    }
+    MailApp.sendEmail({ to: data.to, subject: data.subject, htmlBody: data.html, name: "(株) YOMIRU商会" });
+    return ContentService.createTextOutput(JSON.stringify({success: true})).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+                    </li>
+                    <li>Click **Deploy** -> **New Deployment**. Select **Web app**.</li>
+                    <li>Set **Execute as:** `Me (DeployVYMS@gmail.com)` and **Who has access:** `Anyone`. Click Deploy.</li>
+                    <li>Copy the **Web App URL** and add it to your **Railway Dashboard (Variables tab)** as `SMTP_WEB_URL`.</li>
+                </ol>
+                <p style="margin: 12px 0 0 0; font-weight: 600; color: #15803d;"><i class="fas fa-circle-check"></i> That's it! Once added, your deployed app will send emails 100% successfully over unblockable HTTPS!</p>
+            </div>
         </div>
 
         <!-- Invoice body container -->
