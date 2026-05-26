@@ -55,12 +55,19 @@ public class InvoiceEmailService {
 
             mailSender.send(message);
             return InvoiceSendResult.success(sale.getEmail());
-        } catch (MessagingException | RuntimeException ex) {
+        } catch (MessagingException | org.springframework.mail.MailException ex) {
             logger.error("Invoice email send failed for saleId={} to={}.",
                     sale != null ? sale.getId() : null,
                     sale != null ? sale.getEmail() : null,
                     ex);
-            return InvoiceSendResult.failure("mail_error");
+            String errMsg = ex.getMessage();
+            if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+                errMsg = ex.getCause().getMessage();
+            }
+            return InvoiceSendResult.failure(errMsg != null ? errMsg : "mail_error");
+        } catch (RuntimeException ex) {
+            logger.error("Unexpected error during invoice email send.", ex);
+            return InvoiceSendResult.failure(ex.getMessage() != null ? ex.getMessage() : "unexpected_error");
         }
     }
 }

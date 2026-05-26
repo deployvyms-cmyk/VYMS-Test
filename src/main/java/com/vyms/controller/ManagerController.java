@@ -928,7 +928,12 @@ public class ManagerController {
 
         InvoiceSendResult result = invoiceEmailService.sendInvoiceEmail(sale);
         if (!result.success()) {
-            return "redirect:/manager/sales/invoice/" + id + "?sendError=" + result.errorCode();
+            try {
+                String encoded = java.net.URLEncoder.encode(result.errorCode(), java.nio.charset.StandardCharsets.UTF_8.toString());
+                return "redirect:/manager/sales/invoice/" + id + "?sendError=" + encoded;
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "redirect:/manager/sales/invoice/" + id + "?sendError=mail_error";
+            }
         }
 
         sale.setInvoiceSent(true);
@@ -956,7 +961,12 @@ public class ManagerController {
 
         InvoiceSendResult result = invoiceEmailService.sendInvoiceEmail(sale);
         if (!result.success()) {
-            return "redirect:/manager/sales/invoice/" + id + "?sendError=" + result.errorCode();
+            try {
+                String encoded = java.net.URLEncoder.encode(result.errorCode(), java.nio.charset.StandardCharsets.UTF_8.toString());
+                return "redirect:/manager/sales/invoice/" + id + "?sendError=" + encoded;
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "redirect:/manager/sales/invoice/" + id + "?sendError=mail_error";
+            }
         }
 
         sale.setInvoiceSent(true);

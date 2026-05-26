@@ -368,7 +368,7 @@
                 <span th:case="'missing_email'">Unable to send invoice. Please add a customer email first.</span>
                 <span th:case="'auction'">Unable to send invoice. Auction customers do not have an email address.</span>
                 <span th:case="'mail_error'">Unable to send invoice due to a mail server error. Please try again.</span>
-                <span th:case="*">Unable to send invoice. Please check customer details.</span>
+                <span th:case="*" th:text="${'Unable to send invoice: ' + param.sendError[0]}">Unable to send invoice. Please check customer details.</span>
             </span>
         </div>
 
