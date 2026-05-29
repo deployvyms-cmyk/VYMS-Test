@@ -33,6 +33,8 @@ public class Vehicle {
 
     private String imagePath; // Stored file path for vehicle image
 
+    private String documentPath; // Optional vehicle document path (image/PDF)
+
     private LocalDate addedDate;
 
     @Column(length = 1000)
@@ -136,6 +138,14 @@ public class Vehicle {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public String getDocumentPath() {
+        return documentPath;
+    }
+
+    public void setDocumentPath(String documentPath) {
+        this.documentPath = documentPath;
     }
 
     public LocalDate getAddedDate() {

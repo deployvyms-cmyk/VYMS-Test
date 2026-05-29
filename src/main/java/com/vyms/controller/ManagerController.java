@@ -255,6 +255,7 @@ public class ManagerController {
             @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
             @RequestParam(name = "importantNote", required = false) String importantNote,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam(name = "documentFile", required = false) MultipartFile documentFile,
             RedirectAttributes ra) throws IOException {
 
         String chassis = chassisNumber != null ? chassisNumber.trim().toUpperCase() : "";
@@ -309,6 +310,15 @@ public class ManagerController {
             v.setImagePath(imagePath);
         }
 
+        if (documentFile != null && !documentFile.isEmpty()) {
+            if (!isAllowedDocumentFile(documentFile)) {
+                ra.addFlashAttribute("errorMsg", "Document must be an image or PDF.");
+                return "redirect:/manager/inventory";
+            }
+            String documentPath = saveDocument(documentFile);
+            v.setDocumentPath(documentPath);
+        }
+
         vehicleService.save(v);
         ra.addFlashAttribute("successMsg", "Vehicle added successfully.");
         return "redirect:/manager/inventory";
@@ -340,6 +350,7 @@ public class ManagerController {
             @RequestParam(name = "purchasePaymentMethod") String purchasePaymentMethod,
             @RequestParam(name = "importantNote", required = false) String importantNote,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam(name = "documentFile", required = false) MultipartFile documentFile,
             RedirectAttributes ra) {
 
         String chassis = chassisNumber != null ? chassisNumber.trim().toUpperCase() : "";
@@ -402,11 +413,20 @@ public class ManagerController {
                 v.setImagePath(imagePath);
             }
 
+            if (documentFile != null && !documentFile.isEmpty()) {
+                if (!isAllowedDocumentFile(documentFile)) {
+                    ra.addFlashAttribute("errorMsg", "Document must be an image or PDF.");
+                    return "redirect:/manager/inventory/edit/" + id;
+                }
+                String documentPath = saveDocument(documentFile);
+                v.setDocumentPath(documentPath);
+            }
+
             vehicleService.save(v);
             ra.addFlashAttribute("successMsg", "Vehicle updated successfully.");
             return "redirect:/manager/inventory";
         } catch (IOException ex) {
-            ra.addFlashAttribute("errorMsg", "Image upload failed while updating vehicle.");
+            ra.addFlashAttribute("errorMsg", "File upload failed while updating vehicle.");
             return "redirect:/manager/inventory/edit/" + id;
         } catch (RuntimeException ex) {
             ra.addFlashAttribute("errorMsg", "Update failed. Please check the entered details and try again.");
@@ -452,20 +472,49 @@ public class ManagerController {
     }
 
     private String saveImage(MultipartFile imageFile) throws IOException {
+        return saveUploadedFile(imageFile);
+    }
+
+    private String saveDocument(MultipartFile documentFile) throws IOException {
+        return saveUploadedFile(documentFile);
+    }
+
+    private String saveUploadedFile(MultipartFile file) throws IOException {
         String ext = "";
-        String original = imageFile.getOriginalFilename();
+        String original = file.getOriginalFilename();
         if (original != null && original.contains(".")) {
             ext = original.substring(original.lastIndexOf("."));
         }
         String filename = UUID.randomUUID() + ext;
 
-        UploadedFile file = new UploadedFile();
-        file.setFilename(filename);
-        file.setContentType(imageFile.getContentType());
-        file.setFileData(imageFile.getBytes());
-        uploadedFileRepository.save(file);
+        UploadedFile dbFile = new UploadedFile();
+        dbFile.setFilename(filename);
+        dbFile.setContentType(file.getContentType());
+        dbFile.setFileData(file.getBytes());
+        uploadedFileRepository.save(dbFile);
 
         return "/uploads/" + filename;
+    }
+
+    private boolean isAllowedDocumentFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType != null) {
+            if (contentType.startsWith("image/") || contentType.equals("application/pdf")) {
+                return true;
+            }
+        }
+        String original = file.getOriginalFilename();
+        if (original == null) {
+            return false;
+        }
+        String lower = original.toLowerCase(Locale.ROOT);
+        return lower.endsWith(".png")
+                || lower.endsWith(".jpg")
+                || lower.endsWith(".jpeg")
+                || lower.endsWith(".webp")
+                || lower.endsWith(".gif")
+                || lower.endsWith(".bmp")
+                || lower.endsWith(".pdf");
     }
 
 
