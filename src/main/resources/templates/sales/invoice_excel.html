@@ -1,0 +1,333 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8"/>
+    <!--[if gte mso 9]>
+    <xml>
+     <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+       <x:ExcelWorksheet>
+        <x:Name>請求書</x:Name>
+        <x:WorksheetOptions>
+         <x:DisplayGridlines/>
+        </x:WorksheetOptions>
+       </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+     </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        /* Base Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        td {
+            font-family: "MS PGothic", "Meiryo", "MS Gothic", sans-serif;
+            font-size: 11pt;
+            color: #000000;
+            vertical-align: middle;
+        }
+        
+        /* Font sizes & weights */
+        .title {
+            font-size: 22pt;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+        .subtitle {
+            font-size: 10.5pt;
+            text-align: left;
+        }
+        .customer-name {
+            font-size: 14pt;
+            font-weight: bold;
+            border-bottom: 1.5pt solid #000000;
+        }
+        
+        /* Total Amount Box */
+        .total-box-label {
+            font-size: 12pt;
+            font-weight: bold;
+            background-color: #f2f2f2;
+            border: 1.5pt solid #000000;
+            text-align: center;
+        }
+        .total-box-value {
+            font-size: 16pt;
+            font-weight: bold;
+            background-color: #f2f2f2;
+            border: 1.5pt solid #000000;
+            text-align: center;
+        }
+        
+        /* Table Grid */
+        .th {
+            font-size: 10pt;
+            font-weight: bold;
+            background-color: #e6e6e6;
+            border: 0.5pt solid #000000;
+            text-align: center;
+            padding: 6px;
+        }
+        .td-border {
+            border: 0.5pt solid #000000;
+            padding: 5px;
+        }
+        .td-number {
+            border: 0.5pt solid #000000;
+            text-align: right;
+            padding: 5px;
+            mso-number-format: "\#\,\#\#0";
+        }
+        
+        /* Alignments */
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-bold {
+            font-weight: bold;
+        }
+        
+        /* Company Info */
+        .company-name {
+            font-size: 13pt;
+            font-weight: bold;
+        }
+        .company-detail {
+            font-size: 9pt;
+        }
+        
+        /* Bank Transfer Info */
+        .bank-title {
+            font-size: 10pt;
+            font-weight: bold;
+            border-top: 1pt dashed #000000;
+            padding-top: 8px;
+        }
+        .bank-detail {
+            font-size: 9.5pt;
+        }
+    </style>
+</head>
+<body>
+    <!-- Traditional Japanese Invoicing Template (請求書) -->
+    <table border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse; width: 620px;">
+        <!-- Column Width Definition for Excel -->
+        <colgroup>
+            <col width="40" style="width: 40px;"/>
+            <col width="220" style="width: 220px;"/>
+            <col width="60" style="width: 60px;"/>
+            <col width="60" style="width: 60px;"/>
+            <col width="100" style="width: 100px;"/>
+            <col width="140" style="width: 140px;"/>
+        </colgroup>
+
+        <!-- Row 1: Title -->
+        <tr height="50">
+            <td colspan="6" class="title" height="50" style="height: 50px;">求　　書</td>
+        </tr>
+        
+        <!-- Row 2: Spacer -->
+        <tr height="15">
+            <td colspan="6" height="15"></td>
+        </tr>
+
+        <!-- Row 3: Customer Block & Date Meta Block -->
+        <tr height="25">
+            <!-- Customer Left Block -->
+            <td colspan="3" class="customer-name" height="25" th:switch="${sale.buyerType != null ? sale.buyerType.name() : 'REGULAR_CUSTOMER'}">
+                <span th:case="'REGULAR_CUSTOMER'" th:text="${sale.customerName + '  様'}">遠藤 様</span>
+                <span th:case="'REGULAR_COMPANY'" th:text="${sale.companyName + '  御中'}">株式会社 遠藤 御中</span>
+                <span th:case="'EXPORT'" th:text="${sale.companyName + '  御中'}">Export Co 御中</span>
+                <span th:case="'AUCTION'" th:text="${sale.auctionHouseName + '  御中'}">USS Auction 御中</span>
+            </td>
+            <!-- Empty Spacer -->
+            <td></td>
+            <!-- Date / Invoice Meta Right Block -->
+            <td colspan="2" class="text-right company-detail">
+                No. <span th:text="${'INV-' + sale.id}">INV-1001</span><br/>
+                発行日: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy年MM月dd日')}">2026年05月31日</span>
+            </td>
+        </tr>
+
+        <!-- Row 4: Spacer -->
+        <tr height="10">
+            <td colspan="6" height="10"></td>
+        </tr>
+
+        <!-- Row 5: Greetings & Company Info Block -->
+        <tr height="20">
+            <td colspan="3" class="subtitle" height="20">
+                下記の通り、ご請求申し上げます。
+            </td>
+            <!-- Company Right Info block begins -->
+            <td colspan="3" class="company-name text-right" style="font-weight: bold;">
+                株式会社YOMIRU商会
+            </td>
+        </tr>
+
+        <!-- Row 6: Address & Stamp -->
+        <tr height="18">
+            <td colspan="3"></td>
+            <td colspan="3" class="company-detail text-right">
+                〒299-0224
+            </td>
+        </tr>
+
+        <!-- Row 7: Detail -->
+        <tr height="18">
+            <td colspan="3"></td>
+            <td colspan="3" class="company-detail text-right">
+                千葉県袖ケ浦市吉野田132-2
+            </td>
+        </tr>
+
+        <!-- Row 8: Detail -->
+        <tr height="18">
+            <td colspan="3"></td>
+            <td colspan="3" class="company-detail text-right">
+                Email: zpqsqq4967@yahoo.co.jp
+            </td>
+        </tr>
+
+        <!-- Row 9: Detail -->
+        <tr height="18">
+            <td colspan="3"></td>
+            <td colspan="3" class="company-detail text-right">
+                電話: 0438-53-7581 &nbsp;|&nbsp; 登録番号: T7040001121553
+            </td>
+        </tr>
+
+        <!-- Row 10: Spacer -->
+        <tr height="25">
+            <td colspan="6" height="25"></td>
+        </tr>
+
+        <!-- Row 11: 御請求金額 Total Due Box (Calculated dynamically using formulas) -->
+        <tr height="35">
+            <td class="total-box-label" height="35" style="border: 1.5pt solid #000000; font-weight: bold;">御請求金額</td>
+            <td colspan="3" class="total-box-value" style="border: 1.5pt solid #000000; font-weight: bold; color: #1e3a8a;">
+                =CONCATENATE("￥", TEXT(F21, "#,##0"), " -")
+            </td>
+            <td colspan="2"></td>
+        </tr>
+
+        <!-- Row 12: Spacer -->
+        <tr height="20">
+            <td colspan="6" height="20"></td>
+        </tr>
+
+        <!-- Row 13: Table Header -->
+        <tr height="25">
+            <td class="th" height="25">No</td>
+            <td class="th">品名・内容</td>
+            <td class="th">数量</td>
+            <td class="th">単位</td>
+            <td class="th">単価</td>
+            <td class="th">金額</td>
+        </tr>
+
+        <!-- Row 14: Item 1 (Pre-filled from database) -->
+        <tr height="25">
+            <td class="td-border text-center" height="25">1</td>
+            <td class="td-border" th:text="${sale.vehicle != null ? (sale.vehicle.vehicleModel + (sale.vehicle.chassisNumber != null ? ' (車台番号: ' + sale.vehicle.chassisNumber + ')' : '')) : '車両販売'}">
+                プリウス ZVW51 (車台番号: ZVW51-1234567)
+            </td>
+            <td class="td-border text-center" x:num>1</td>
+            <td class="td-border text-center">台</td>
+            <td class="td-number" th:text="${sale.salePrice}" x:num>70000</td>
+            <td class="td-number" x:num>=C14*E14</td>
+        </tr>
+
+        <!-- Row 15: Blank Row 2 (Editable) -->
+        <tr height="25">
+            <td class="td-border text-center" height="25">2</td>
+            <td class="td-border"></td>
+            <td class="td-border text-center" x:num></td>
+            <td class="td-border text-center"></td>
+            <td class="td-number" x:num></td>
+            <td class="td-number" x:num>=IF(AND(C15&lt;&gt;"",E15&lt;&gt;""),C15*E15,"")</td>
+        </tr>
+
+        <!-- Row 16: Blank Row 3 (Editable) -->
+        <tr height="25">
+            <td class="td-border text-center" height="25">3</td>
+            <td class="td-border"></td>
+            <td class="td-border text-center" x:num></td>
+            <td class="td-border text-center"></td>
+            <td class="td-number" x:num></td>
+            <td class="td-number" x:num>=IF(AND(C16&lt;&gt;"",E16&lt;&gt;""),C16*E16,"")</td>
+        </tr>
+
+        <!-- Row 17: Blank Row 4 (Editable) -->
+        <tr height="25">
+            <td class="td-border text-center" height="25">4</td>
+            <td class="td-border"></td>
+            <td class="td-border text-center" x:num></td>
+            <td class="td-border text-center"></td>
+            <td class="td-number" x:num></td>
+            <td class="td-number" x:num>=IF(AND(C17&lt;&gt;"",E17&lt;&gt;""),C17*E17,"")</td>
+        </tr>
+
+        <!-- Row 18: Blank Row 5 (Editable) -->
+        <tr height="25">
+            <td class="td-border text-center" height="25">5</td>
+            <td class="td-border"></td>
+            <td class="td-border text-center" x:num></td>
+            <td class="td-border text-center"></td>
+            <td class="td-number" x:num></td>
+            <td class="td-number" x:num>=IF(AND(C18&lt;&gt;"",E18&lt;&gt;""),C18*E18,"")</td>
+        </tr>
+
+        <!-- Row 19: Subtotal Row (Calculated using SUM) -->
+        <tr height="25">
+            <td colspan="4" class="td-border text-right text-bold" height="25">小計</td>
+            <td colspan="2" class="td-number text-bold" x:num>=SUM(F14:F18)</td>
+        </tr>
+
+        <!-- Row 20: Tax Row (Calculated using Subtotal * 10%) -->
+        <tr height="25">
+            <td colspan="4" class="td-border text-right" height="25">消費税(10%)</td>
+            <td colspan="2" class="td-number" x:num>=ROUND(F19*0.1, 0)</td>
+        </tr>
+
+        <!-- Row 21: Total Row (Calculated using Subtotal + Tax) -->
+        <tr height="25">
+            <td colspan="4" class="td-border text-right text-bold" height="25" style="background-color: #f2f2f2;">合計金額</td>
+            <td colspan="2" class="td-number text-bold" height="25" style="background-color: #f2f2f2; color: #b91c1c; font-size: 12pt;" x:num>=F19+F20</td>
+        </tr>
+
+        <!-- Row 22: Spacer -->
+        <tr height="20">
+            <td colspan="6" height="20"></td>
+        </tr>
+
+        <!-- Row 23: Bank Transfer Block -->
+        <tr height="22">
+            <td colspan="6" class="bank-title" height="22">【お振込先】</td>
+        </tr>
+        <tr height="20">
+            <td colspan="6" class="bank-detail">金 融 機 関 名：千葉信用金庫 （チバシンヨウキンコ）</td>
+        </tr>
+        <tr height="20">
+            <td colspan="6" class="bank-detail">支　　店　　名：岩根支店 （イワネシテン）</td>
+        </tr>
+        <tr height="20">
+            <td colspan="6" class="bank-detail">口　座　種　別：普通</td>
+        </tr>
+        <tr height="20">
+            <td colspan="6" class="bank-detail">口　座　番　号：００２００８７</td>
+        </tr>
+        <tr height="20">
+            <td colspan="6" class="bank-detail">口　座　名　義：カ）ヨミルショウカイ</td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1102,6 +1102,29 @@ public class ManagerController {
         return "redirect:/manager/sales/invoice/" + id + "?resendSuccess=1";
     }
 
+    @GetMapping("/sales/invoice/{id}/word")
+    public String downloadInvoiceWord(@PathVariable("id") Long id, Model model, jakarta.servlet.http.HttpServletResponse response) {
+        Optional<Sale> saleOpt = saleService.findById(id);
+        if (saleOpt.isPresent()) {
+            Sale sale = saleOpt.get();
+            model.addAttribute("sale", sale);
+            
+            // Set headers for Word document download
+            response.setContentType("application/msword; charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=\"invoice-INV-" + id + ".doc\"");
+            
+            // UTF-8 BOM helps MS Word identify the document encoding correctly
+            try {
+                response.getWriter().write("\uFEFF");
+            } catch (Exception e) {
+                // Ignore
+            }
+            
+            return "sales/invoice_word";
+        }
+        return "redirect:/manager/sales";
+    }
+
     @GetMapping("/sales/download")
     public ResponseEntity<byte[]> downloadSalesReport() {
         List<Sale> sales = saleService.findAll();

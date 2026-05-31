@@ -79,13 +79,94 @@
             });
         }
 
+        // Protect company names from being translated by Google Translate
+        function protectCompanyNames() {
+            const companyRegex = /(?:株式会社|㈱|（株）|\(株\))?\s*YOMIRU\s*(?:商会)?|Yomiru Shokai Co\., Ltd\.|YOMIRU商会/gi;
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const nodesToProcess = [];
+            let node;
+            while (node = walker.nextNode()) {
+                const text = node.nodeValue;
+                if (text && (text.toUpperCase().includes('YOMIRU') || text.includes('商会'))) {
+                    let parent = node.parentNode;
+                    if (!parent) continue;
+                    const parentTagName = parent.tagName.toLowerCase();
+                    if (parentTagName === 'script' || parentTagName === 'style' || parentTagName === 'textarea') {
+                        continue;
+                    }
+                    // Check if already protected
+                    let alreadyProtected = false;
+                    let curr = parent;
+                    while (curr && curr !== document.body) {
+                        if (curr.classList && (curr.classList.contains('notranslate') || curr.getAttribute('translate') === 'no')) {
+                            alreadyProtected = true;
+                            break;
+                        }
+                        curr = curr.parentNode;
+                    }
+                    if (!alreadyProtected) {
+                        nodesToProcess.push(node);
+                    }
+                }
+            }
+
+            nodesToProcess.forEach(textNode => {
+                const parent = textNode.parentNode;
+                if (!parent) return;
+
+                const text = textNode.nodeValue;
+                let lastIndex = 0;
+                let match;
+                const fragment = document.createDocumentFragment();
+
+                // Reset regex lastIndex
+                companyRegex.lastIndex = 0;
+
+                while ((match = companyRegex.exec(text)) !== null) {
+                    const matchIndex = match.index;
+                    const matchText = match[0];
+
+                    // Add preceding text
+                    if (matchIndex > lastIndex) {
+                        fragment.appendChild(document.createTextNode(text.substring(lastIndex, matchIndex)));
+                    }
+
+                    // Add protected company node
+                    const span = document.createElement('span');
+                    span.className = 'notranslate';
+                    span.setAttribute('translate', 'no');
+                    span.textContent = matchText;
+                    fragment.appendChild(span);
+
+                    lastIndex = companyRegex.lastIndex;
+                }
+
+                // Add remaining text
+                if (lastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+                }
+
+                if (fragment.childNodes.length > 0) {
+                    parent.replaceChild(fragment, textNode);
+                }
+            });
+        }
+
         // Run protection immediately
         protectCurrencies();
+        protectCompanyNames();
 
-        // Observe dynamic DOM changes to protect new/updated currency elements
+        // Observe dynamic DOM changes to protect new/updated elements
         const observer = new MutationObserver(() => {
             observer.disconnect();
             protectCurrencies();
+            protectCompanyNames();
             observer.observe(document.body, { childList: true, subtree: true, characterData: true });
         });
         observer.observe(document.body, { childList: true, subtree: true, characterData: true });

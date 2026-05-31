@@ -262,29 +262,136 @@
             color: var(--text-muted, #64748b);
         }
 
-        .vehicle-note {
+        /* Extras section (document + note) - hidden by default, toggled via JS */
+        .vehicle-extras {
             display: none;
             margin-top: 10px;
+            padding: 0;
+            animation: fadeSlideIn 0.25s ease;
+        }
+
+        .vehicle-card.extras-open .vehicle-extras {
+            display: block;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .vehicle-doc-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+            border: 1px solid #bfdbfe;
+            text-decoration: none;
+            color: #1e40af;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .vehicle-doc-link:hover {
+            background: linear-gradient(135deg, #dbeafe, #dcfce7);
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+        }
+
+        .vehicle-doc-link i {
+            font-size: 16px;
+            color: #2563eb;
+            flex-shrink: 0;
+        }
+
+        .vehicle-doc-link .doc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .vehicle-doc-link .doc-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 1px;
+        }
+
+        .vehicle-doc-link .doc-action {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .vehicle-doc-link .doc-open-icon {
+            color: #94a3b8;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .vehicle-note {
+            margin-top: 0;
             padding: 10px 12px;
             border-radius: 8px;
             border: 1px dashed var(--border, #e2e8f0);
-            background: #f8fafc;
+            background: #fffbeb;
             font-size: 13px;
             color: var(--text-main, #0f172a);
+            line-height: 1.5;
         }
 
         .vehicle-note-title {
             font-weight: 700;
             font-size: 12px;
-            color: var(--text-muted, #64748b);
+            color: #92400e;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .vehicle-card.note-open .vehicle-note {
-            display: block;
+        .btn-view-extras {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 7px 12px;
+            margin-top: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view-extras:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-view-extras i.chevron {
+            transition: transform 0.25s ease;
+            font-size: 10px;
+        }
+
+        .vehicle-card.extras-open .btn-view-extras {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .vehicle-card.extras-open .btn-view-extras i.chevron {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -400,10 +507,32 @@
                     <div class="detail-row price" th:if="${vehicle.salePrice != null}">
                         Finalized Sale Price <span><th:block th:text="${'¥' + #numbers.formatDecimal(vehicle.salePrice, 1, 0)}"></th:block></span>
                     </div>
-                    <div class="vehicle-note" th:if="${vehicle.importantNote != null and !vehicle.importantNote.isEmpty()}">
-                        <div class="vehicle-note-title"><i class="fas fa-note-sticky"></i> Important Note</div>
-                        <div th:text="${vehicle.importantNote}">Important note</div>
-                    </div>
+                    <!-- View Extras toggle button (only if document or note exists) -->
+                    <th:block th:if="${(vehicle.documentPath != null and !vehicle.documentPath.isEmpty()) or (vehicle.importantNote != null and !vehicle.importantNote.isEmpty())}">
+                        <button type="button" class="btn-view-extras" th:attr="onclick='toggleExtras(this)'">
+                            <i class="fas fa-eye"></i>
+                            <span>View Extras</span>
+                            <i class="fas fa-chevron-down chevron"></i>
+                        </button>
+                        <div class="vehicle-extras">
+                            <!-- Document link -->
+                            <a th:if="${vehicle.documentPath != null and !vehicle.documentPath.isEmpty()}"
+                               th:href="${vehicle.documentPath}" target="_blank" rel="noopener"
+                               class="vehicle-doc-link">
+                                <i class="fas fa-file-lines"></i>
+                                <div class="doc-info">
+                                    <span class="doc-label">Uploaded Document</span>
+                                    <span class="doc-action">View / Download</span>
+                                </div>
+                                <i class="fas fa-arrow-up-right-from-square doc-open-icon"></i>
+                            </a>
+                            <!-- Important Note -->
+                            <div class="vehicle-note" th:if="${vehicle.importantNote != null and !vehicle.importantNote.isEmpty()}">
+                                <div class="vehicle-note-title"><i class="fas fa-note-sticky"></i> Important Note</div>
+                                <div th:text="${vehicle.importantNote}">Important note</div>
+                            </div>
+                        </div>
+                    </th:block>
                     <div class="vehicle-actions">
                         <a th:href="@{/manager/inventory/edit/{id}(id=${vehicle.id})}" class="btn btn-outline btn-sm"
                             style="text-decoration:none; flex-grow:1; text-align:center; justify-content:center;">
@@ -527,6 +656,21 @@
     </div>
 
     <script>
+        // ===================== Toggle Extras (Document + Note) =====================
+        function toggleExtras(btn) {
+            const card = btn.closest('.vehicle-card');
+            const isOpen = card.classList.toggle('extras-open');
+            const label = btn.querySelector('span');
+            const icon = btn.querySelector('i:first-child');
+            if (isOpen) {
+                label.textContent = 'Hide Extras';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                label.textContent = 'View Extras';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
         // ===================== Brand Typeahead =====================
         const ALL_BRANDS = [
             'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi',

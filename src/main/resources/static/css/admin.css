@@ -983,10 +983,10 @@ select.form-control {
 
 .page-alert-success,
 .flash-success {
-  background: rgba(99, 102, 241, 0.06); /* Soft Indigo/Purple System background */
-  color: #4f46e5; /* Primary Indigo/Purple theme */
-  border-color: rgba(99, 102, 241, 0.18);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.05);
+  background: rgba(16, 185, 129, 0.06); /* Soft Green System background */
+  color: #10b981; /* Premium Success Green theme */
+  border-color: rgba(16, 185, 129, 0.18);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
 }
 
 .page-alert-error,

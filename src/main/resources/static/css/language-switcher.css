@@ -137,3 +137,23 @@ body.translated-ltr, body.translated-rtl {
     position: static !important;
     top: 0 !important;
 }
+
+/* Hide switcher completely on print */
+@media print {
+    .lang-switcher-container,
+    .lang-switch-wrapper,
+    #google_translate_element,
+    .skiptranslate,
+    iframe.goog-te-banner-frame,
+    .goog-te-balloon-frame,
+    .goog-tooltip,
+    .goog-te-gadget {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
+}
