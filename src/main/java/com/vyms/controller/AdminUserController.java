@@ -98,7 +98,7 @@ public class AdminUserController {
     }
 
     // Deletes a user if it will not remove the last core role.
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, RedirectAttributes ra) {
         Optional<User> userOpt = userService.findById(id);
         if (userOpt.isPresent()) {

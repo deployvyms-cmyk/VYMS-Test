@@ -226,10 +226,13 @@
                                 th:data-role="${user.role?.name()}">
                                 <i class="fas fa-pencil-alt"></i> Edit
                             </button>
-                            <a th:href="@{'/admin/users/delete/' + ${user.id}}" class="btn-danger-sm"
-                                onclick="return confirm('Delete this employee?')">
-                                <i class="fas fa-trash"></i> Delete
-                            </a>
+                            <form th:action="@{'/admin/users/delete/' + ${user.id}}" method="post"
+                                style="display:inline;margin:0;">
+                                <button type="submit" class="btn-danger-sm"
+                                    onclick="return confirm('Delete this employee?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     <tr th:if="${users == null or users.empty}">

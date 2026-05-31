@@ -203,20 +203,47 @@
                     <div class="edit-card" style="padding: 20px; margin-top: 16px;">
                         <p class="form-label" style="margin-bottom: 12px;">Vehicle Document (Optional)</p>
 
-                        <a th:if="${vehicle.documentPath != null and !vehicle.documentPath.isEmpty()}"
-                           th:href="${vehicle.documentPath}" target="_blank" rel="noopener"
-                           class="btn btn-outline" style="width:100%; justify-content:center; text-decoration:none; margin-bottom:10px;">
-                            <i class="fas fa-file"></i> View Document
-                        </a>
-                        <p th:if="${vehicle.documentPath == null or vehicle.documentPath.isEmpty()}"
-                           style="margin:0 0 10px; font-size:12px; color: var(--text-muted); text-align:center;">
-                            No document uploaded yet
-                        </p>
+                        <!-- Document current display / placeholder -->
+                        <div th:if="${vehicle.documentPath != null and !vehicle.documentPath.isEmpty()}"
+                            class="image-preview-placeholder" id="docPlaceholder" style="height: 220px; background: linear-gradient(135deg, #eff6ff, #f0fdf4); color: #2563eb; border: 1px solid #bfdbfe; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                            <i class="fas fa-file-shield" style="font-size: 48px;"></i>
+                            <span style="font-size: 13px; font-weight: 600; color: #1e40af;">Document Uploaded</span>
+                            <a th:href="${vehicle.documentPath}" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="text-decoration: none; padding: 6px 12px; background: white; border-color: #bfdbfe; color: #1e40af; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-external-link-alt"></i> View Current Document
+                            </a>
+                        </div>
+                        <div th:unless="${vehicle.documentPath != null and !vehicle.documentPath.isEmpty()}"
+                            class="image-preview-placeholder" id="docPlaceholder" style="height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                            <i class="fas fa-file-circle-xmark" style="font-size: 48px;"></i>
+                            <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">No document uploaded yet</span>
+                        </div>
 
-                        <input type="file" name="documentFile" class="form-control" accept="image/*,application/pdf"
-                            th:disabled="${vehicle != null and vehicle.status == 'SOLD'}">
+                        <!-- New file selected indicator box -->
+                        <div style="display:none; height:220px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px dashed #4ade80; border-radius: 8px; margin-bottom: 12px; flex-direction: column; align-items: center; justify-content: center; gap: 12px;" id="docPreviewNew">
+                            <i class="fas fa-file-arrow-up" style="font-size: 48px; color: #16a34a;"></i>
+                            <span style="font-size: 13px; font-weight: 600; color: #14532d;">New Document Selected</span>
+                        </div>
+
+                        <!-- Hidden file input -->
+                        <input type="file" name="documentFile" id="documentFileInput" accept="image/*,application/pdf"
+                            style="display:none;"
+                            th:disabled="${vehicle != null and vehicle.status == 'SOLD'}"
+                            onchange="previewDocument(event)">
+
+                        <!-- Browse button -->
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button type="button" class="btn btn-outline" style="flex:1; justify-content:center;"
+                                th:disabled="${vehicle != null and vehicle.status == 'SOLD'}"
+                                onclick="document.getElementById('documentFileInput').click()">
+                                <i class="fas fa-folder-open"></i> Browse
+                            </button>
+                        </div>
+
+                        <p id="docNameDisplay" style="margin-top: 8px; font-size: 12px; color: var(--text-muted); text-align: center;">
+                            No file selected
+                        </p>
                         <p style="margin-top: 6px; font-size: 11px; color: #94a3b8; text-align: center;">
-                            Upload an image or PDF. This opens in a new tab.
+                            Upload an image or PDF. Leave empty to keep current.
                         </p>
                     </div>
                 </div>
@@ -566,6 +593,22 @@
                 if (placeholder) placeholder.style.display = 'none';
             };
             reader.readAsDataURL(file);
+        }
+
+        function previewDocument(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById('docNameDisplay').textContent = file.name;
+            
+            const preview = document.getElementById('docPreviewNew');
+            const placeholder = document.getElementById('docPlaceholder');
+            
+            if (preview) {
+                preview.style.display = 'flex';
+            }
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
         }
 
         function toggleEditNote() {
